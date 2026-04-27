@@ -47,10 +47,15 @@
   .booking-side.soll h4{background:#eff6ff;color:#1e40af}
   .booking-side.haben h4{background:#fef3c7;color:#92400e}
   .booking-row{display:grid;grid-template-columns:1fr 110px;gap:6px;padding:8px;
-    border-bottom:1px solid var(--line)}
+    border-bottom:1px solid var(--line);align-items:start}
   .booking-row:last-child{border-bottom:none}
   .booking-row.empty{padding:8px;color:var(--muted);font-size:12px;font-style:italic;text-align:center;
     display:block}
+  .konto-wrap{display:flex;flex-direction:column;gap:2px}
+  .konto-hint{font-size:11px;line-height:1.3;min-height:14px;padding:0 4px;color:var(--muted);
+    transition:color .15s}
+  .konto-hint.match{color:var(--good);font-weight:500}
+  .konto-hint.unknown{color:#b45309;font-style:italic}
   input.field, select.field{width:100%;padding:8px 10px;border:2px solid var(--line);border-radius:8px;
     font-size:14px;font-family:inherit;background:#fff;transition:all .15s}
   input.field[type="text"]{font-variant-numeric:tabular-nums}
@@ -90,6 +95,10 @@
   .summary{text-align:center;padding:30px}
   .summary .score{font-size:48px;font-weight:700;color:var(--primary);margin:14px 0}
   .hint{font-size:12px;color:var(--muted);margin-top:6px;font-style:italic}
+  footer{max-width:920px;margin:30px auto 20px;padding:14px 20px;font-size:12px;color:var(--muted);
+    text-align:center;border-top:1px solid var(--line)}
+  footer code{background:#fff;padding:2px 6px;border-radius:4px;border:1px solid var(--line);
+    font-size:11px;color:var(--primary)}
   @media (max-width:600px){
     .booking-grid, .sol-grid{grid-template-columns:1fr}
     .booking-row{grid-template-columns:1fr 100px}
@@ -115,6 +124,10 @@
   <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:33%"></div></div>
   <div id="cardArea"></div>
 </div>
+
+<footer>
+  UNCO Karteikarten · 2. SBO 30.04.2026 · <code>v1.3</code> · Stand: 27.04.2026, 11:09 Uhr (CEST)
+</footer>
 
 <script>
 /* ============================================================
@@ -659,7 +672,10 @@ function render(){
   const buildRow = (l, i) => {
     const kontoCell = state.mode==="drop"
       ? buildSelect(`konto_${i}`, "")
-      : `<input class="field" type="text" data-name="konto_${i}" placeholder="z.B. 5000" autocomplete="off">`;
+      : `<div class="konto-wrap">
+           <input class="field" type="text" data-name="konto_${i}" placeholder="z.B. 5000" autocomplete="off" inputmode="numeric">
+           <div class="konto-hint" data-hint="${i}">&nbsp;</div>
+         </div>`;
     const betragCell = `<input class="field betrag-input" type="text" inputmode="decimal" data-name="betrag_${i}" placeholder="0,00" autocomplete="off">`;
     return `<div class="booking-row">${kontoCell}${betragCell}</div>`;
   };
@@ -698,6 +714,30 @@ function render(){
 
   document.getElementById("btnCheck").onclick = checkCard;
   document.getElementById("btnSkip").onclick  = revealSolution;
+
+  // Live-Konto-Lookup beim Tippen (nur Fill-Modus)
+  if(state.mode === "fill"){
+    document.querySelectorAll('input[data-name^="konto_"]').forEach(inp=>{
+      const i = inp.dataset.name.split('_')[1];
+      const hint = document.querySelector(`[data-hint="${i}"]`);
+      if(!hint) return;
+      const update = ()=>{
+        const v = inp.value.trim();
+        if(!v){ hint.innerHTML = "&nbsp;"; hint.className = "konto-hint"; return; }
+        if(KONTEN[v] && v !== "—"){
+          hint.textContent = KONTEN[v];
+          hint.className = "konto-hint match";
+        } else if(v.length >= 4){
+          hint.textContent = "Kontonummer nicht im Plan";
+          hint.className = "konto-hint unknown";
+        } else {
+          hint.innerHTML = "&nbsp;";
+          hint.className = "konto-hint";
+        }
+      };
+      inp.addEventListener('input', update);
+    });
+  }
 }
 
 function getInputs(){
