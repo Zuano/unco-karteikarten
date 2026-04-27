@@ -143,7 +143,7 @@
 </div>
 
 <footer>
-  UNCO Karteikarten · 2. SBO 30.04.2026 · <code>v1.4</code> · Stand: 27.04.2026, 11:30 Uhr (CEST)
+  UNCO Karteikarten · 2. SBO 30.04.2026 · <code>v1.5</code> · Stand: 27.04.2026, 11:45 Uhr (CEST)
 </footer>
 
 <script>
@@ -681,7 +681,15 @@ function buildTopicBar(){
     const b = document.createElement("button");
     b.className = "topic-btn"+(t.id===state.topic?" active":"");
     b.textContent = t.label;
-    b.onclick = ()=>{ state.topic=t.id; resetDeck(); render(); };
+    b.onclick = ()=>{
+      if(state.topic === t.id) return;
+      state.topic = t.id;
+      // Active-Klasse direkt auf alle Topic-Buttons aktualisieren
+      bar.querySelectorAll(".topic-btn").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+      resetDeck();
+      render();
+    };
     bar.appendChild(b);
   });
 }
