@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>UNCO Karteikarten – 2. SBO 30.04.2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --primary:#1e40af; --primary-dark:#1e3a8a;
+    --accent:#0ea5e9; --good:#16a34a; --good-bg:#dcfce7; --bad:#dc2626; --bad-bg:#fee2e2;
+    --muted:#64748b; --line:#e2e8f0; --text:#0f172a; --hint:#fef3c7; --hint-text:#78350f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5}
+  header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:20px 24px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1)}
+  header h1{margin:0;font-size:22px;font-weight:600}
+  header p{margin:4px 0 0;opacity:.85;font-size:14px}
+  .container{max-width:920px;margin:0 auto;padding:20px}
+  .topic-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .topic-btn{flex:1;min-width:180px;padding:14px 12px;border:2px solid var(--line);background:#fff;border-radius:12px;
+    cursor:pointer;font-size:14px;font-weight:600;color:var(--text);text-align:center;transition:all .15s}
+  .topic-btn:hover{border-color:var(--primary);color:var(--primary)}
+  .topic-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+  .mode-bar{display:flex;gap:8px;margin-bottom:18px}
+  .mode-btn{flex:1;padding:10px;border:2px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;
+    font-size:13px;font-weight:600;color:var(--muted);transition:all .15s}
+  .mode-btn:hover{color:var(--primary)}
+  .mode-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .progress{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
+    font-size:13px;color:var(--muted);font-weight:500}
+  .progress-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:18px}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--primary));
+    transition:width .3s ease;border-radius:3px}
+  .card{background:var(--card);border-radius:16px;padding:24px;box-shadow:0 4px 16px rgba(15,23,42,.08);
+    border:1px solid var(--line);animation:slideIn .25s ease}
+  @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .card h2{margin:0 0 6px;font-size:16px;color:var(--primary);font-weight:600}
+  .scenario{background:#f8fafc;border-left:4px solid var(--accent);padding:12px 14px;border-radius:8px;
+    margin:12px 0 18px;font-size:15px}
+  .scenario b{color:var(--primary-dark)}
+  .booking-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .booking-side{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+  .booking-side h4{margin:0;padding:8px 12px;font-size:12px;letter-spacing:1px;text-transform:uppercase;
+    text-align:center;font-weight:700;border-bottom:2px solid var(--line)}
+  .booking-side.soll h4{background:#eff6ff;color:#1e40af}
+  .booking-side.haben h4{background:#fef3c7;color:#92400e}
+  .booking-row{display:grid;grid-template-columns:1fr 110px;gap:6px;padding:8px;
+    border-bottom:1px solid var(--line)}
+  .booking-row:last-child{border-bottom:none}
+  .booking-row.empty{padding:8px;color:var(--muted);font-size:12px;font-style:italic;text-align:center;
+    display:block}
+  input.field, select.field{width:100%;padding:8px 10px;border:2px solid var(--line);border-radius:8px;
+    font-size:14px;font-family:inherit;background:#fff;transition:all .15s}
+  input.field[type="text"]{font-variant-numeric:tabular-nums}
+  input.field:focus, select.field:focus{outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(14,165,233,.15)}
+  input.field.correct, select.field.correct{border-color:var(--good);background:var(--good-bg)}
+  input.field.wrong, select.field.wrong{border-color:var(--bad);background:var(--bad-bg)}
+  .betrag-input{text-align:right}
+  .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .btn{padding:10px 18px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;
+    transition:all .15s}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-secondary{background:#fff;color:var(--primary);border:2px solid var(--line)}
+  .btn-secondary:hover{border-color:var(--primary)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .feedback{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:14px;font-weight:500;display:none}
+  .feedback.show{display:block;animation:slideIn .25s ease}
+  .feedback.good{background:var(--good-bg);color:#14532d;border:1px solid #86efac}
+  .feedback.bad{background:var(--bad-bg);color:#7f1d1d;border:1px solid #fca5a5}
+  .solution-card{margin-top:14px;background:linear-gradient(135deg,#fff7ed,#ffedd5);
+    border:2px dashed #fb923c;border-radius:14px;padding:18px;animation:flipIn .4s ease}
+  @keyframes flipIn{from{opacity:0;transform:rotateX(-90deg)}to{opacity:1;transform:rotateX(0)}}
+  .solution-card h3{margin:0 0 10px;color:#9a3412;font-size:14px;text-transform:uppercase;letter-spacing:.5px}
+  .sol-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .sol-side{background:#fff;border:1px solid #fed7aa;border-radius:10px;overflow:hidden}
+  .sol-side h4{margin:0;padding:6px 10px;font-size:11px;letter-spacing:1px;text-transform:uppercase;
+    text-align:center;font-weight:700;background:#fff7ed;color:#9a3412;border-bottom:1px solid #fed7aa}
+  .sol-row-2{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px 10px;
+    border-bottom:1px solid #fed7aa;font-size:14px}
+  .sol-row-2:last-child{border-bottom:none}
+  .sol-konto{color:#0f172a}
+  .sol-betrag{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:#0f172a}
+  .sol-empty{padding:14px;text-align:center;color:#9a3412;opacity:.6;font-size:13px;font-style:italic}
+  .explanation{margin-top:10px;padding:10px;background:var(--hint);color:var(--hint-text);
+    border-radius:8px;font-size:13px;border:1px solid #fde68a}
+  .summary{text-align:center;padding:30px}
+  .summary .score{font-size:48px;font-weight:700;color:var(--primary);margin:14px 0}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px;font-style:italic}
+  @media (max-width:600px){
+    .booking-grid, .sol-grid{grid-template-columns:1fr}
+    .booking-row{grid-template-columns:1fr 100px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>UNCO Karteikarten — 2. SBO am 30.04.2026</h1>
+  <p>Übungen zu: Rücksendungen · Rechnungsausgleich/Mahnspesen/Verzugszinsen · Anlagengüter inkl. GWG · Bezugs- und Versandkosten</p>
+</header>
+
+<div class="container">
+  <div class="topic-bar" id="topicBar"></div>
+  <div class="mode-bar">
+    <button class="mode-btn active" id="modeFill" data-mode="fill">✏️ Selbst ausfüllen</button>
+    <button class="mode-btn" id="modeDrop" data-mode="drop">📋 Multiple Choice (Dropdown)</button>
+  </div>
+  <div class="progress">
+    <span id="progressText">Karte 1 / 3</span>
+    <span id="scoreText">Punkte: 0</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:33%"></div></div>
+  <div id="cardArea"></div>
+</div>
+
+<script>
+/* ============================================================
+   UNCO Karteikarten — Daten
+   Buchungen folgen dem Kontenplan 2. Semester (2AHB)
+   ============================================================ */
+
+// gemeinsamer Pool von Konto-Optionen für Dropdowns
+const KONTEN = {
+  // häufig im Einsatz
+  "—": "—",
+  "0120": "0120 Datenverarbeitungsprogramme",
+  "0121": "0121 Geringwertige Datenverarbeitungsprogramme",
+  "0400": "0400 Maschinen",
+  "0480": "0480 Geringwertige Maschinen",
+  "0500": "0500 Werkzeuge",
+  "0550": "0550 Geringwertige Werkzeuge",
+  "0600": "0600 Betriebs- und Geschäftsausstattung",
+  "0620": "0620 Büromaschinen, EDV-Anlagen",
+  "0630": "0630 Pkw und Kombis",
+  "0640": "0640 Lkw",
+  "0670": "0670 Geringwertige Betriebs- und Geschäftsausstattung",
+  "0672": "0672 Geringwertige Büromaschinen, EDV-Anlagen",
+  "2000": "2000 Lieferforderungen",
+  "2500": "2500 Vorsteuer",
+  "2700": "2700 Kassa",
+  "2800": "2800 Bank",
+  "3300": "3300 Lieferverbindlichkeiten",
+  "3500": "3500 Umsatzsteuer",
+  "4000": "4000 Handelswarenerlöse 20%",
+  "4400": "4400 Erlösberichtigungen 20%",
+  "4410": "4410 Kundenskonti 20%",
+  "4890": "4890 Mahnspesenvergütungen",
+  "5000": "5000 Handelswareneinsatz 20%",
+  "5600": "5600 Bezugskosten",
+  "5880": "5880 Lieferantenskonti auf Wareneinkauf 20%",
+  "7060": "7060 Abschreibungen geringwertiger Wirtschaftsgüter",
+  "7240": "7240 Heizölverbrauch",
+  "7270": "7270 Stromverbrauch",
+  "7300": "7300 Ausgangsfrachten 20%",
+  "7310": "7310 Paketgebühren 20%",
+  "7385": "7385 Portogebühren",
+  "7600": "7600 Büromaterial",
+  "8055": "8055 Verzugszinsenerträge",
+  "8320": "8320 Verzugszinsenaufwand",
+  "8321": "8321 Mahnspesen"
+};
+
+const TOPICS = [
+  { id:"ruecksendung", label:"1. Rücksendungen" },
+  { id:"mahnspesen",   label:"2. Rechnungsausgleich, Mahnspesen, Verzugszinsen" },
+  { id:"anlagen",      label:"3. Kauf Anlagengüter inkl. GWG" },
+  { id:"bezugskosten", label:"4. Bezugs- und Versandkosten" }
+];
+
+/* Hilfsfunktion zum schnellen Bauen einer Buchungssatz-Karte */
+function bk(scenario, lines, explanation){
+  return { scenario, lines, explanation };
+}
+function L(side, konto, betrag){ return { side, konto, betrag }; } // side = "Soll" | "Haben"
+
+/* ============================================================
+   ÜBUNGEN
+   ============================================================ */
+const EXERCISES = {
+  /* ---------- 1. Rücksendungen ---------- */
+  ruecksendung: {
+    fill: [
+      bk(
+        "Ein Kunde sendet uns Handelswaren im Wert von <b>€ 1.000,00</b> netto + 20 % USt zurück (Originalrechnung schon gebucht). Buche die <b>Rücksendung beim Verkäufer</b>.",
+        [
+          L("Soll",  "4400", 1000),
+          L("Soll",  "3500",  200),
+          L("Haben", "2000", 1200)
+        ],
+        "Bei Rücksendung an uns wird der ursprüngliche Erlös rückgängig gemacht: <b>4400 Erlösberichtigungen 20 %</b> + <b>3500 Umsatzsteuer</b> an <b>2000 Lieferforderungen</b>."
+      ),
+      bk(
+        "Wir senden an unseren Lieferanten gekaufte Handelswaren im Wert von <b>€ 500,00</b> netto + 20 % USt zurück. Buche die <b>Rücksendung beim Käufer</b>.",
+        [
+          L("Soll",  "3300", 600),
+          L("Haben", "5000", 500),
+          L("Haben", "2500", 100)
+        ],
+        "Beim Käufer wird der Wareneinsatz storniert: <b>3300 Lieferverbindlichkeiten</b> an <b>5000 Handelswareneinsatz 20 %</b> + <b>2500 Vorsteuer</b>."
+      ),
+      bk(
+        "Ein Kunde reklamiert Waren um <b>€ 250,00</b> netto + 20 % USt und sendet sie zurück; die Rechnung wurde noch nicht bezahlt. Wie lautet der Buchungssatz beim Verkäufer?",
+        [
+          L("Soll",  "4400", 250),
+          L("Soll",  "3500",  50),
+          L("Haben", "2000", 300)
+        ],
+        "Achtung: Auch wenn noch nicht bezahlt wurde, reduziert sich die Forderung (2000) um den Bruttobetrag, weil der Kunde nun weniger schuldet."
+      ),
+      bk(
+        "Wir senden beschädigte Handelswaren um <b>€ 1.200,00</b> netto + 20 % USt an den Lieferanten zurück (Rechnung noch offen).",
+        [
+          L("Soll",  "3300", 1440),
+          L("Haben", "5000", 1200),
+          L("Haben", "2500",  240)
+        ],
+        "Beim Käufer: 3300 Lieferverbindlichkeiten an 5000 Handelswareneinsatz + 2500 Vorsteuer (Bruttobetrag mindert die Verbindlichkeit)."
+      ),
+      bk(
+        "Ein Kunde sendet Waren um <b>€ 350,00</b> netto + 20 % USt zurück. Wir hatten die Rechnung schon erhalten und bezahlt — wir <b>überweisen</b> dem Kunden den Betrag zurück. Buche die <b>Rückzahlung</b> (die Rücksendung selbst ist bereits gebucht).",
+        [
+          L("Soll",  "2000", 420),
+          L("Haben", "2800", 420)
+        ],
+        "Die Rücksendung wurde bereits über 4400/3500 an 2000 gebucht (Forderung ist negativ = Schuld an Kunden). Die Rückzahlung gleicht diese aus: 2000 Lieferforderungen an 2800 Bank."
+      )
+    ],
+    drop: [
+      bk(
+        "Wir bekommen Handelswaren um <b>€ 800,00</b> netto + 20 % USt von unserem Kunden zurück. <i>Wähle die richtigen Konten und Beträge:</i>",
+        [
+          L("Soll",  "4400", 800),
+          L("Soll",  "3500", 160),
+          L("Haben", "2000", 960)
+        ],
+        "Erlösberichtigung 4400 + Umsatzsteuer 3500 an Lieferforderungen 2000 (Bruttobetrag)."
+      ),
+      bk(
+        "Wir senden Waren um <b>€ 1.500,00</b> netto + 20 % USt an unseren Lieferanten zurück.",
+        [
+          L("Soll",  "3300", 1800),
+          L("Haben", "5000", 1500),
+          L("Haben", "2500",  300)
+        ],
+        "Beim Käufer: 3300 Lieferverbindlichkeiten an 5000 Handelswareneinsatz + 2500 Vorsteuer."
+      ),
+      bk(
+        "Ein Kunde meldet Mängel und sendet Waren um <b>€ 2.000,00</b> netto + 20 % USt zurück.",
+        [
+          L("Soll",  "4400", 2000),
+          L("Soll",  "3500",  400),
+          L("Haben", "2000", 2400)
+        ],
+        "Bruttowert € 2.400,- mindert die Forderung."
+      ),
+      bk(
+        "Wir senden Handelswaren um <b>€ 750,00</b> netto + 20 % USt zurück an den Lieferanten.",
+        [
+          L("Soll",  "3300", 900),
+          L("Haben", "5000", 750),
+          L("Haben", "2500", 150)
+        ],
+        "Beim Käufer: Lieferverbindlichkeit reduziert sich um Brutto, Wareneinsatz und Vorsteuer werden storniert."
+      ),
+      bk(
+        "Ein Kunde reklamiert Waren um <b>€ 480,00</b> netto + 20 % USt und sendet sie zurück. Die Rechnung wurde bereits per Bank bezahlt. Buche die <b>Bank-Rückzahlung</b> (die Rücksendung selbst wurde schon gebucht).",
+        [
+          L("Soll",  "2000", 576),
+          L("Haben", "2800", 576)
+        ],
+        "Nach der Rücksendung-Buchung haben wir eine 'Schuld' (negative Forderung) gegenüber dem Kunden. Die Rückzahlung gleicht diese aus."
+      )
+    ]
+  },
+
+  /* ---------- 2. Rechnungsausgleich, Mahnspesen, Verzugszinsen ---------- */
+  mahnspesen: {
+    fill: [
+      bk(
+        "Ein Kunde zahlt verspätet. Wir verrechnen ihm <b>€ 15,00 Mahnspesen</b> und <b>€ 12,00 Verzugszinsen</b>. Buche die <b>Belastung beim Verkäufer</b> (Erhöhung der Forderung).",
+        [
+          L("Soll",  "2000", 27),
+          L("Haben", "4890", 15),
+          L("Haben", "8055", 12)
+        ],
+        "Beim Verkäufer sind das <b>Erträge</b>: Mahnspesen → 4890 Mahnspesenvergütungen, Verzugszinsen → 8055 Verzugszinsenerträge. Die Forderung 2000 erhöht sich um den Gesamtbetrag. Mahnspesen sind <b>nicht umsatzsteuerpflichtig</b>."
+      ),
+      bk(
+        "Wir bezahlen unserem Lieferanten verspätet und müssen <b>€ 20,00 Mahnspesen</b> sowie <b>€ 35,00 Verzugszinsen</b> zahlen. Buche die <b>Verbindlichkeitserhöhung beim Käufer</b>.",
+        [
+          L("Soll",  "8321", 20),
+          L("Soll",  "8320", 35),
+          L("Haben", "3300", 55)
+        ],
+        "Beim Käufer sind das <b>Aufwendungen</b>: 8321 Mahnspesen, 8320 Verzugszinsenaufwand. Die Lieferverbindlichkeit erhöht sich entsprechend."
+      ),
+      bk(
+        "Ein Kunde überweist eine Rechnung über <b>€ 1.200,00</b> (brutto) inklusive berechneter Mahnspesen € 10,- und Verzugszinsen € 8,-. Buche den <b>Bankeingang</b>.",
+        [
+          L("Soll",  "2800", 1200),
+          L("Haben", "2000", 1200)
+        ],
+        "Der Zahlungseingang berührt nur Bank und Lieferforderung — die Mahnspesen/Verzugszinsen wurden ja bereits beim Verrechnen gebucht."
+      ),
+      bk(
+        "Wir bezahlen eine Eingangsrechnung in Höhe von <b>€ 3.600,00</b> brutto durch Banküberweisung unter Abzug von <b>3 % Skonto</b>.",
+        [
+          L("Soll",  "3300", 3600),
+          L("Haben", "2800", 3492),
+          L("Haben", "5880",  90),
+          L("Haben", "2500",  18)
+        ],
+        "3 % von 3.600 = 108 brutto Skonto. Davon 18 Vorsteuerkorrektur (108/6) und 90 Lieferantenskonti netto. Bank zahlt 3.492."
+      ),
+      bk(
+        "Ein säumiger Kunde überweist die ausstehende Rechnung. Wir verrechnen ihm vorher <b>€ 25,00 Mahnspesen</b> und <b>€ 18,00 Verzugszinsen</b>. Buche die <b>Verrechnung beim Verkäufer</b>.",
+        [
+          L("Soll",  "2000", 43),
+          L("Haben", "4890", 25),
+          L("Haben", "8055", 18)
+        ],
+        "Beim Verkäufer Erträge: 4890 Mahnspesenvergütungen, 8055 Verzugszinsenerträge — Forderung steigt. Mahnspesen und Verzugszinsen sind <b>USt-frei</b>."
+      )
+    ],
+    drop: [
+      bk(
+        "Wir verrechnen einem säumigen Kunden <b>€ 18,00 Mahnspesen</b> und <b>€ 22,00 Verzugszinsen</b>.",
+        [
+          L("Soll",  "2000", 40),
+          L("Haben", "4890", 18),
+          L("Haben", "8055", 22)
+        ],
+        "Beim Verkäufer Ertragskonten 4890 + 8055; Forderung 2000 erhöht sich."
+      ),
+      bk(
+        "Unser Lieferant stellt uns wegen Zahlungsverzug <b>€ 25,00 Mahnspesen</b> und <b>€ 40,00 Verzugszinsen</b> in Rechnung.",
+        [
+          L("Soll",  "8321", 25),
+          L("Soll",  "8320", 40),
+          L("Haben", "3300", 65)
+        ],
+        "Beim Käufer Aufwandskonten 8321 + 8320; Lieferverbindlichkeit 3300 erhöht sich."
+      ),
+      bk(
+        "Wir bezahlen die Eingangsrechnung in Höhe von <b>€ 2.460,00</b> brutto durch Banküberweisung unter Abzug von <b>2 % Skonto</b>.",
+        [
+          L("Soll",  "3300", 2460),
+          L("Haben", "2800", 2410.80),
+          L("Haben", "5880",  41),
+          L("Haben", "2500",   8.20)
+        ],
+        "2 % von 2.460 = 49,20 brutto Skonto. Davon 8,20 Vorsteuerkorrektur (49,20/6) und 41,00 Lieferantenskonti."
+      ),
+      bk(
+        "Ein Kunde bezahlt seine Rechnung von <b>€ 1.800,00</b> brutto per Bank unter Abzug von <b>2 % Skonto</b>.",
+        [
+          L("Soll",  "2800", 1764),
+          L("Soll",  "4410",   30),
+          L("Soll",  "3500",    6),
+          L("Haben", "2000", 1800)
+        ],
+        "2 % von 1.800 = 36 brutto Skonto. Davon 6 Umsatzsteuerkorrektur (36/6) und 30 Kundenskonti netto. Bank erhält 1.764. Beim Verkäufer mindern Kundenskonti den Erlös → 4410."
+      ),
+      bk(
+        "Wir verrechnen einem Kunden <b>€ 12,00 Mahnspesen</b> und <b>€ 9,50 Verzugszinsen</b> wegen Zahlungsverzug.",
+        [
+          L("Soll",  "2000", 21.50),
+          L("Haben", "4890", 12),
+          L("Haben", "8055",  9.50)
+        ],
+        "Beim Verkäufer Erträge auf 4890 + 8055; Forderung 2000 erhöht sich um die Summe."
+      )
+    ]
+  },
+
+  /* ---------- 3. Kauf Anlagengüter inkl. GWG ---------- */
+  anlagen: {
+    fill: [
+      bk(
+        "Wir kaufen eine <b>neue Maschine</b> auf Ziel um <b>€ 12.000,00</b> netto + 20 % USt.",
+        [
+          L("Soll",  "0400", 12000),
+          L("Soll",  "2500",  2400),
+          L("Haben", "3300", 14400)
+        ],
+        "Maschine > € 1.000 netto → echtes Anlagengut. Buchung: 0400 Maschinen + 2500 Vorsteuer an 3300 Lieferverbindlichkeiten."
+      ),
+      bk(
+        "Wir kaufen einen <b>Bürodrucker um € 600,00</b> netto + 20 % USt auf Ziel. Buche den Kauf <b>als geringwertiges Wirtschaftsgut (GWG)</b>.",
+        [
+          L("Soll",  "0672", 600),
+          L("Soll",  "2500", 120),
+          L("Haben", "3300", 720)
+        ],
+        "GWG ≤ € 1.000 netto → eigenes GWG-Anlagenkonto: hier <b>0672 Geringwertige Büromaschinen, EDV-Anlagen</b>. Anschließend wird das GWG sofort voll abgeschrieben (siehe nächste Karte)."
+      ),
+      bk(
+        "Sofortige <b>Vollabschreibung</b> des soeben gekauften GWG (Bürodrucker € 600,-).",
+        [
+          L("Soll",  "7060", 600),
+          L("Haben", "0672", 600)
+        ],
+        "Die Vollabschreibung des GWG erfolgt im Anschaffungsjahr: <b>7060 Abschreibungen geringwertiger Wirtschaftsgüter</b> an das GWG-Anlagenkonto."
+      ),
+      bk(
+        "Wir kaufen einen <b>Werkzeugsatz um € 850,00</b> netto + 20 % USt auf Ziel und behandeln ihn als GWG.",
+        [
+          L("Soll",  "0550", 850),
+          L("Soll",  "2500", 170),
+          L("Haben", "3300", 1020)
+        ],
+        "GWG ≤ € 1.000 netto → eigenes GWG-Konto: <b>0550 Geringwertige Werkzeuge</b>. Vorsteuer auf den Nettowert."
+      ),
+      bk(
+        "Wir kaufen <b>Büromaterial um € 120,00</b> netto + 20 % USt bar (kein Anlagengut!).",
+        [
+          L("Soll",  "7600", 120),
+          L("Soll",  "2500",  24),
+          L("Haben", "2700", 144)
+        ],
+        "Achtung — Verbrauchsmaterial ist <b>kein</b> Anlagengut, auch nicht GWG. Direkt auf Aufwandskonto <b>7600 Büromaterial</b>."
+      )
+    ],
+    drop: [
+      bk(
+        "Wir kaufen einen <b>Lkw um € 35.000,00</b> netto + 20 % USt auf Ziel.",
+        [
+          L("Soll",  "0640", 35000),
+          L("Soll",  "2500",  7000),
+          L("Haben", "3300", 42000)
+        ],
+        "Lkw ist ein <b>echtes Anlagengut</b> mit voller Vorsteuerabzugsberechtigung: <b>0640 Lkw</b> + <b>2500 Vorsteuer</b> an <b>3300 Lieferverbindlichkeiten</b>. (Bei Pkw/Kombi gäbe es keinen Vorsteuerabzug — daher hier bewusst der Lkw.)"
+      ),
+      bk(
+        "Wir kaufen <b>5 Bürostühle um je € 180,00</b> netto + 20 % USt (Summe netto € 900,-) auf Ziel und behandeln sie als GWG.",
+        [
+          L("Soll",  "0670", 900),
+          L("Soll",  "2500", 180),
+          L("Haben", "3300", 1080)
+        ],
+        "GWG der Betriebs- und Geschäftsausstattung → Konto <b>0670</b>. (Sofortige Abschreibung über 7060 erfolgt anschließend.)"
+      ),
+      bk(
+        "Sofortige <b>Vollabschreibung der GWG-Bürostühle</b> aus der vorigen Aufgabe (€ 900,-).",
+        [
+          L("Soll",  "7060", 900),
+          L("Haben", "0670", 900)
+        ],
+        "Die GWG werden im Jahr der Anschaffung voll abgeschrieben."
+      ),
+      bk(
+        "Wir kaufen ein neues <b>Datenverarbeitungsprogramm um € 480,00</b> netto + 20 % USt auf Ziel (GWG).",
+        [
+          L("Soll",  "0121", 480),
+          L("Soll",  "2500",  96),
+          L("Haben", "3300", 576)
+        ],
+        "Software ist immaterielles Anlagengut. Da unter € 1.000 → GWG: <b>0121 Geringwertige Datenverarbeitungsprogramme</b>."
+      ),
+      bk(
+        "Wir kaufen <b>3 Akkubohrer für je € 320,00</b> netto + 20 % USt (Summe netto € 960,-) auf Ziel — als GWG.",
+        [
+          L("Soll",  "0550", 960),
+          L("Soll",  "2500", 192),
+          L("Haben", "3300", 1152)
+        ],
+        "Mehrere selbstständig nutzbare Geräte unter je € 1.000 = GWG. Werkzeuge → <b>0550 Geringwertige Werkzeuge</b>."
+      )
+    ]
+  },
+
+  /* ---------- 4. Bezugs- und Versandkosten ---------- */
+  bezugskosten: {
+    fill: [
+      bk(
+        "Wir kaufen Handelswaren um <b>€ 4.000,00</b> netto + 20 % USt auf Ziel. Der Lieferant verrechnet zusätzlich <b>€ 200,00</b> netto + 20 % USt <b>Frachtkosten (Bezugskosten)</b>.",
+        [
+          L("Soll",  "5000", 4000),
+          L("Soll",  "5600",  200),
+          L("Soll",  "2500",  840),
+          L("Haben", "3300", 5040)
+        ],
+        "Eingehende Frachten beim <b>Wareneinkauf</b> sind <b>5600 Bezugskosten</b>. Die Vorsteuer wird auf den Gesamtbetrag (4.000 + 200 = 4.200) berechnet → 840."
+      ),
+      bk(
+        "Wir verkaufen Handelswaren um <b>€ 3.000,00</b> netto + 20 % USt. Der Versand kostet uns <b>€ 80,00</b> netto + 20 % USt; das Paketservice (Post) verrechnen wir bar.",
+        [
+          L("Soll",  "7310", 80),
+          L("Soll",  "2500", 16),
+          L("Haben", "2700", 96)
+        ],
+        "Versandkosten beim <b>Verkauf</b> sind kein Bezugskonto, sondern <b>7310 Paketgebühren 20 %</b> (Aufwand). Vorsteuer 20 % vom Versand. Bar bezahlt → 2700 Kassa."
+      ),
+      bk(
+        "Wir senden eine Rechnung per Post an einen Kunden. <b>Portokosten € 4,90</b> bar.",
+        [
+          L("Soll",  "7385", 4.90),
+          L("Haben", "2700", 4.90)
+        ],
+        "Briefporto Post = <b>7385 Portogebühren</b> (umsatzsteuerbefreit, daher kein Vorsteuerabzug)."
+      ),
+      bk(
+        "Wir kaufen eine <b>Maschine um € 15.000,00</b> netto + 20 % USt auf Ziel und zahlen zusätzlich <b>€ 500,00</b> Transportkosten netto + 20 % USt (auch auf Ziel).",
+        [
+          L("Soll",  "0400", 15500),
+          L("Soll",  "2500",  3100),
+          L("Haben", "3300", 18600)
+        ],
+        "Bei Anlagengütern werden Bezugskosten <b>aktiviert</b> = in den Anschaffungswert eingerechnet (15.000 + 500 = 15.500), <b>nicht</b> auf 5600 gebucht."
+      ),
+      bk(
+        "Eine Spedition liefert uns Handelswaren und stellt uns <b>€ 250,00</b> netto + 20 % USt <b>Bezugsfracht</b> in Rechnung. Bezahlung mit Bank.",
+        [
+          L("Soll",  "5600", 250),
+          L("Soll",  "2500",  50),
+          L("Haben", "2800", 300)
+        ],
+        "Reine Bezugskostenrechnung der Spedition (ohne Warenwert). 5600 Bezugskosten + 2500 Vorsteuer an 2800 Bank."
+      )
+    ],
+    drop: [
+      bk(
+        "Wir kaufen Handelswaren um <b>€ 2.500,00</b> netto + 20 % USt; der Lieferant verrechnet zusätzlich <b>€ 100,00</b> netto + 20 % USt für den Transport. Zahlung auf Ziel.",
+        [
+          L("Soll",  "5000", 2500),
+          L("Soll",  "5600",  100),
+          L("Soll",  "2500",  520),
+          L("Haben", "3300", 3120)
+        ],
+        "Eingehende Frachten = 5600 Bezugskosten."
+      ),
+      bk(
+        "Ein Paketdienst (DHL) verrechnet uns für den Versand an Kunden <b>€ 60,00</b> netto + 20 % USt. Bezahlung mit Bank.",
+        [
+          L("Soll",  "7310", 60),
+          L("Soll",  "2500", 12),
+          L("Haben", "2800", 72)
+        ],
+        "Versand an Kunden = Aufwand. <b>7310 Paketgebühren 20 %</b> + Vorsteuer; Bezahlung über 2800 Bank."
+      ),
+      bk(
+        "Wir kaufen ein Anlagegut (Maschine) um <b>€ 8.000,00</b> netto + 20 % USt auf Ziel und zahlen zusätzlich <b>€ 300,00</b> Transportkosten netto + 20 % USt (auch auf Ziel).",
+        [
+          L("Soll",  "0400", 8300),
+          L("Soll",  "2500", 1660),
+          L("Haben", "3300", 9960)
+        ],
+        "Bezugskosten beim Kauf eines <b>Anlageguts</b> werden in die <b>Anschaffungskosten</b> eingerechnet (aktiviert) und nicht auf 5600 gebucht. → 0400 Maschinen 8.300."
+      ),
+      bk(
+        "Wir versenden Waren mit dem Paketdienst und zahlen dafür <b>€ 25,00</b> netto + 20 % USt bar.",
+        [
+          L("Soll",  "7310", 25),
+          L("Soll",  "2500",  5),
+          L("Haben", "2700", 30)
+        ],
+        "Versand an Kunden = Aufwand auf <b>7310 Paketgebühren 20 %</b>."
+      ),
+      bk(
+        "Briefporto für die Post: <b>€ 12,00</b>, bar bezahlt (USt-frei).",
+        [
+          L("Soll",  "7385", 12),
+          L("Haben", "2700", 12)
+        ],
+        "Briefporto bei der Post ist <b>USt-frei</b>, daher kein Vorsteuerabzug. Konto: 7385 Portogebühren."
+      )
+    ]
+  }
+};
+
+/* ============================================================
+   APP-LOGIK
+   ============================================================ */
+let state = {
+  topic: TOPICS[0].id,
+  mode: "fill",            // "fill" | "drop"
+  cardIdx: 0,
+  score: 0,
+  total: 0,
+  answered: false
+};
+
+function deck(){ return EXERCISES[state.topic][state.mode]; }
+function currentCard(){ return deck()[state.cardIdx]; }
+
+const fmt = n => {
+  // 1.000,00 oder 4,90 etc.
+  return n.toLocaleString("de-AT",{minimumFractionDigits:2,maximumFractionDigits:2});
+};
+const num = (s) => {
+  if(s===null||s===undefined) return NaN;
+  const cleaned = String(s).replace(/\./g,"").replace(",",".").replace(/[^\d.\-]/g,"");
+  return parseFloat(cleaned);
+};
+
+function buildTopicBar(){
+  const bar = document.getElementById("topicBar");
+  bar.innerHTML = "";
+  TOPICS.forEach(t=>{
+    const b = document.createElement("button");
+    b.className = "topic-btn"+(t.id===state.topic?" active":"");
+    b.textContent = t.label;
+    b.onclick = ()=>{ state.topic=t.id; resetDeck(); render(); };
+    bar.appendChild(b);
+  });
+}
+
+function setMode(m){
+  if(state.mode===m) return;
+  state.mode = m;
+  document.getElementById("modeFill").classList.toggle("active",m==="fill");
+  document.getElementById("modeDrop").classList.toggle("active",m==="drop");
+  resetDeck();
+  render();
+}
+
+function resetDeck(){ state.cardIdx=0; state.score=0; state.total=0; state.answered=false; }
+
+function buildSelect(name, value){
+  // dropdown mit allen Konten
+  const opts = Object.entries(KONTEN).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+  return `<select class="field" data-name="${name}"><option value="">— Konto wählen —</option>${opts}</select>`;
+}
+
+function render(){
+  const area = document.getElementById("cardArea");
+  const total = deck().length;
+  const idx = state.cardIdx;
+
+  // wichtig: bei jedem neuen Render eine "frische" Karte → answered zurücksetzen
+  state.answered = false;
+
+  // progress
+  document.getElementById("progressText").textContent = `Karte ${Math.min(idx+1,total)} / ${total}`;
+  document.getElementById("scoreText").textContent = `Punkte: ${state.score} / ${state.total}`;
+  document.getElementById("progressFill").style.width = `${((idx)/total)*100}%`;
+
+  // Übung abgeschlossen?
+  if(idx>=total){
+    area.innerHTML = `<div class="card summary">
+      <h2>Übung abgeschlossen 🎉</h2>
+      <div class="score">${state.score} / ${state.total}</div>
+      <p>${state.score===state.total?"Perfekt! Alle Buchungssätze richtig.":state.score>=state.total*0.7?"Gut gemacht — fast alles richtig.":"Noch ein bisschen üben — du schaffst das!"}</p>
+      <div class="actions" style="justify-content:center">
+        <button class="btn btn-primary" onclick="resetDeck();render()">🔁 Übung nochmal starten</button>
+      </div>
+    </div>`;
+    document.getElementById("progressFill").style.width="100%";
+    return;
+  }
+
+  const card = currentCard();
+  const lines = card.lines;
+
+  // Soll/Haben Spalten aufbauen mit globalen Indizes (für späteres checken)
+  const buildRow = (l, i) => {
+    const kontoCell = state.mode==="drop"
+      ? buildSelect(`konto_${i}`, "")
+      : `<input class="field" type="text" data-name="konto_${i}" placeholder="z.B. 5000" autocomplete="off">`;
+    const betragCell = `<input class="field betrag-input" type="text" inputmode="decimal" data-name="betrag_${i}" placeholder="0,00" autocomplete="off">`;
+    return `<div class="booking-row">${kontoCell}${betragCell}</div>`;
+  };
+
+  const sollRows  = lines.map((l,i)=>l.side==="Soll"  ? buildRow(l,i) : null).filter(Boolean).join("")
+                  || `<div class="booking-row empty">— keine Buchung im Soll —</div>`;
+  const habenRows = lines.map((l,i)=>l.side==="Haben" ? buildRow(l,i) : null).filter(Boolean).join("")
+                  || `<div class="booking-row empty">— keine Buchung im Haben —</div>`;
+
+  area.innerHTML = `
+    <div class="card">
+      <h2>${TOPICS.find(t=>t.id===state.topic).label} — ${state.mode==="fill"?"Selbst ausfüllen":"Multiple Choice"}</h2>
+      <div class="scenario">${card.scenario}</div>
+      <div class="booking-grid">
+        <div class="booking-side soll">
+          <h4>Soll</h4>
+          ${sollRows}
+        </div>
+        <div class="booking-side haben">
+          <h4>Haben</h4>
+          ${habenRows}
+        </div>
+      </div>
+      <p class="hint">${state.mode==="fill"
+        ? "Soll-Konten links, Haben-Konten rechts. Kontonummer (z.B. <b>5000</b>) und Betrag eintragen — Komma oder Punkt funktionieren beide."
+        : "Soll-Konten links, Haben-Konten rechts. Wähle die richtigen Konten aus den Dropdowns."
+      }</p>
+      <div class="actions">
+        <button class="btn btn-primary" id="btnCheck">✓ Prüfen</button>
+        <button class="btn btn-secondary" id="btnSkip" title="Lösung anzeigen ohne zu prüfen">💡 Lösung anzeigen</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <div id="solutionSlot"></div>
+    </div>
+  `;
+
+  document.getElementById("btnCheck").onclick = checkCard;
+  document.getElementById("btnSkip").onclick  = revealSolution;
+}
+
+function getInputs(){
+  return Array.from(document.querySelectorAll('#cardArea .field'));
+}
+
+function checkCard(){
+  if(state.answered) return;
+  const card = currentCard();
+  const inputs = getInputs();
+  let allCorrect = true;
+  card.lines.forEach((l,i)=>{
+    const kontoEl  = document.querySelector(`[data-name="konto_${i}"]`);
+    const betragEl = document.querySelector(`[data-name="betrag_${i}"]`);
+    const kontoOK  = (kontoEl.value||"").trim() === l.konto;
+    const betragOK = Math.abs((num(betragEl.value)||-1) - l.betrag) < 0.005;
+    kontoEl.classList.toggle("correct",kontoOK);
+    kontoEl.classList.toggle("wrong",!kontoOK);
+    betragEl.classList.toggle("correct",betragOK);
+    betragEl.classList.toggle("wrong",!betragOK);
+    if(!kontoOK || !betragOK) allCorrect = false;
+  });
+
+  state.total += 1;
+  if(allCorrect) state.score += 1;
+  state.answered = true;
+
+  const fb = document.getElementById("feedback");
+  fb.classList.add("show");
+  if(allCorrect){
+    fb.classList.add("good"); fb.classList.remove("bad");
+    fb.innerHTML = "✅ <b>Richtig gebucht!</b> " + (card.explanation || "");
+  }else{
+    fb.classList.add("bad"); fb.classList.remove("good");
+    fb.innerHTML = "❌ <b>Noch nicht ganz.</b> Schau dir die Lösung unten als Karteikarte an.";
+    showSolutionCard();
+  }
+
+  // Buttons umschalten
+  const a = document.querySelector(".actions");
+  a.innerHTML = `<button class="btn btn-primary" id="btnNext">→ Nächste Karte</button>
+                 <button class="btn btn-secondary" id="btnRetry">🔄 Diese Karte wiederholen</button>`;
+  document.getElementById("btnNext").onclick = ()=>{ state.cardIdx++; render(); };
+  document.getElementById("btnRetry").onclick = ()=>{ state.answered=false; state.total-=1; if(allCorrect) state.score-=1; render(); };
+
+  // progress score live
+  document.getElementById("scoreText").textContent = `Punkte: ${state.score} / ${state.total}`;
+}
+
+function showSolutionCard(){
+  const card = currentCard();
+  const slot = document.getElementById("solutionSlot");
+  const rowFor = side => {
+    const items = card.lines.filter(l=>l.side===side);
+    if(!items.length) return `<div class="sol-empty">— —</div>`;
+    return items.map(l=>`
+      <div class="sol-row-2">
+        <span class="sol-konto">${KONTEN[l.konto]||l.konto}</span>
+        <span class="sol-betrag">€ ${fmt(l.betrag)}</span>
+      </div>`).join("");
+  };
+  slot.innerHTML = `<div class="solution-card">
+    <h3>📇 Lösungs-Karteikarte</h3>
+    <div class="sol-grid">
+      <div class="sol-side"><h4>Soll</h4>${rowFor("Soll")}</div>
+      <div class="sol-side"><h4>Haben</h4>${rowFor("Haben")}</div>
+    </div>
+    ${card.explanation?`<div class="explanation">💡 ${card.explanation}</div>`:""}
+  </div>`;
+}
+
+function revealSolution(){
+  if(state.answered) return;
+  // Ohne Wertung: nur Lösung zeigen
+  state.answered = true;
+  state.total += 1; // gilt als beantwortet, aber kein Punkt
+  showSolutionCard();
+  const fb = document.getElementById("feedback");
+  fb.classList.add("show","bad");
+  fb.innerHTML = "💡 Lösung angezeigt (kein Punkt, weil ohne Versuch).";
+  const a = document.querySelector(".actions");
+  a.innerHTML = `<button class="btn btn-primary" id="btnNext">→ Nächste Karte</button>`;
+  document.getElementById("btnNext").onclick = ()=>{ state.cardIdx++; render(); };
+  document.getElementById("scoreText").textContent = `Punkte: ${state.score} / ${state.total}`;
+}
+
+/* Init */
+document.getElementById("modeFill").onclick = ()=>setMode("fill");
+document.getElementById("modeDrop").onclick = ()=>setMode("drop");
+buildTopicBar();
+render();
+</script>
+</body>
+</html>
