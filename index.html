@@ -32,6 +32,9 @@
   .badge{position:absolute;top:-8px;right:-8px;background:var(--bad);color:#fff;border-radius:999px;
     padding:2px 7px;font-size:11px;font-weight:700;min-width:22px;text-align:center;
     box-shadow:0 2px 4px rgba(0,0,0,.15);border:2px solid #fff}
+  .badge.done{background:var(--good);font-size:13px;line-height:1;padding:3px 6px;min-width:22px;
+    animation:popIn .3s ease}
+  @keyframes popIn{from{transform:scale(0)}50%{transform:scale(1.2)}to{transform:scale(1)}}
   .review-banner{margin-bottom:14px;padding:12px 14px;border-radius:10px;background:#fff7ed;
     color:#9a3412;border:1px solid #fed7aa;font-size:13px;display:flex;justify-content:space-between;
     align-items:center;flex-wrap:wrap;gap:8px}
@@ -163,8 +166,8 @@
 
 /* >>> BUILD-INFO: bei JEDER Änderung Version hochzählen + Zeit aktualisieren <<< */
 const BUILD = {
-  version: "v1.7",
-  timestamp: "28.04.2026, 10:38 Uhr (CEST)"
+  version: "v1.9",
+  timestamp: "28.04.2026, 14:30 Uhr (CEST)"
 };
 
 // gemeinsamer Pool von Konto-Optionen für Dropdowns
@@ -675,7 +678,8 @@ let state = {
   answered: false,
   selectedGewinn: null,    // "erhoehend" | "vermindernd" | "neutral" | null
   subset: null,            // im Review-Modus: Array von Indizes; sonst null
-  wrongByDeck: {}          // { "topic_mode": Set<cardIdx> }
+  wrongByDeck: {},         // { "topic_mode": Set<cardIdx> } — falsch beantwortete Karten
+  correctByDeck: {}        // { "topic_mode": Set<cardIdx> } — richtig beantwortete Karten
 };
 
 function deck(){ return EXERCISES[state.topic][state.mode]; }
@@ -685,12 +689,26 @@ function wrongSet(){
   if(!state.wrongByDeck[deckKey()]) state.wrongByDeck[deckKey()] = new Set();
   return state.wrongByDeck[deckKey()];
 }
+function correctSet(){
+  if(!state.correctByDeck[deckKey()]) state.correctByDeck[deckKey()] = new Set();
+  return state.correctByDeck[deckKey()];
+}
 function wrongCountFor(topic, mode){
   const s = state.wrongByDeck[deckKeyFor(topic, mode)];
   return s ? s.size : 0;
 }
+function correctCountFor(topic, mode){
+  const s = state.correctByDeck[deckKeyFor(topic, mode)];
+  return s ? s.size : 0;
+}
 function topicWrongCount(topic){
   return wrongCountFor(topic, "fill") + wrongCountFor(topic, "drop");
+}
+function modeDone(topic, mode){
+  return correctCountFor(topic, mode) === EXERCISES[topic][mode].length;
+}
+function topicDone(topic){
+  return modeDone(topic, "fill") && modeDone(topic, "drop");
 }
 function totalCards(){ return state.subset ? state.subset.length : deck().length; }
 function currentDeckIdx(){ return state.subset ? state.subset[state.cardIdx] : state.cardIdx; }
@@ -738,23 +756,35 @@ function setMode(m){
   updateAllBadges();
 }
 
-function setBadge(el, count){
+function setBadge(el, wrongCount, done){
   let badge = el.querySelector(".badge");
-  if(count > 0){
-    if(!badge){ badge = document.createElement("span"); badge.className = "badge"; el.appendChild(badge); }
-    badge.textContent = count;
+  if(wrongCount > 0){
+    // rote Badge — hat Vorrang
+    if(!badge){ badge = document.createElement("span"); el.appendChild(badge); }
+    badge.className = "badge";
+    badge.textContent = wrongCount;
+    badge.title = wrongCount + " falsche Karte" + (wrongCount===1?"":"n") + " offen";
+  } else if(done){
+    // grünes Häkchen — Topic/Modus zu 100% gelöst
+    if(!badge){ badge = document.createElement("span"); el.appendChild(badge); }
+    badge.className = "badge done";
+    badge.textContent = "✓";
+    badge.title = "Alle Karten richtig gelöst";
   } else if(badge){
     badge.remove();
   }
 }
 function updateAllBadges(){
-  // Topic-Buttons: Summe falscher Karten beider Modi
+  // Topic-Buttons: rote Zahl (Summe falscher beider Modi) ODER grüner Haken wenn topicDone
   document.querySelectorAll("#topicBar .topic-btn").forEach(b=>{
-    setBadge(b, topicWrongCount(b.dataset.topic));
+    const tid = b.dataset.topic;
+    setBadge(b, topicWrongCount(tid), topicDone(tid));
   });
-  // Mode-Buttons: nur des aktuellen Topics
-  setBadge(document.getElementById("modeFill"), wrongCountFor(state.topic, "fill"));
-  setBadge(document.getElementById("modeDrop"), wrongCountFor(state.topic, "drop"));
+  // Mode-Buttons: rote Zahl ODER grüner Haken wenn der jeweilige Modus done ist
+  setBadge(document.getElementById("modeFill"),
+           wrongCountFor(state.topic, "fill"), modeDone(state.topic, "fill"));
+  setBadge(document.getElementById("modeDrop"),
+           wrongCountFor(state.topic, "drop"), modeDone(state.topic, "drop"));
 }
 
 function resetDeck(){ state.cardIdx=0; state.score=0; state.total=0; state.answered=false; state.selectedGewinn=null; state.subset=null; }
@@ -812,6 +842,10 @@ function render(){
       message = inReview
         ? "Super — alle Wiederholungs-Karten jetzt richtig gelöst!"
         : "Perfekt! Alle Buchungssätze richtig.";
+      if(topicDone(state.topic)){
+        const topicLabel = TOPICS.find(t=>t.id===state.topic).label;
+        message += ` ✅ Du hast jetzt das gesamte Thema „${topicLabel}" zu 100 % gelöst!`;
+      }
     } else if(state.score>=state.total*0.7){
       message = "Gut gemacht — fast alles richtig.";
     } else {
@@ -963,17 +997,30 @@ function checkCard(){
 
   // Gewinn-Auswirkung prüfen
   const gewinnOK = state.selectedGewinn === card.gewinn;
+  const gewinnMissing = state.selectedGewinn === null;
   document.querySelectorAll(".gewinn-btn").forEach(b=>{
     b.classList.remove("correct","wrong");
-    if(b.dataset.gewinn === card.gewinn) b.classList.add("correct");
-    else if(b.dataset.gewinn === state.selectedGewinn) b.classList.add("wrong");
+    if(gewinnMissing){
+      // User hat nichts gewählt → alle Buttons rot markieren, damit klar ist:
+      // hier wurde eine Auswahl vergessen (statt der korrekten als "richtig" zu zeigen)
+      b.classList.add("wrong");
+    } else if(b.dataset.gewinn === card.gewinn){
+      b.classList.add("correct");
+    } else if(b.dataset.gewinn === state.selectedGewinn){
+      b.classList.add("wrong");
+    }
   });
   if(!gewinnOK) allCorrect = false;
 
-  // Karten-Tracking: falsche Karte merken / richtige aus wrongSet entfernen
+  // Karten-Tracking: zwei persistente Sets pro Deck
   const cardIdx = currentDeckIdx();
-  if(allCorrect){ wrongSet().delete(cardIdx); }
-  else          { wrongSet().add(cardIdx); }
+  if(allCorrect){
+    wrongSet().delete(cardIdx);
+    correctSet().add(cardIdx);
+  } else {
+    wrongSet().add(cardIdx);
+    correctSet().delete(cardIdx);
+  }
   updateAllBadges();
 
   state.total += 1;
@@ -987,7 +1034,12 @@ function checkCard(){
     fb.innerHTML = "✅ <b>Richtig gebucht!</b> " + (card.explanation || "");
   }else{
     fb.classList.add("bad"); fb.classList.remove("good");
-    fb.innerHTML = "❌ <b>Noch nicht ganz.</b> Schau dir die Lösung unten als Karteikarte an.";
+    let msg = "❌ <b>Noch nicht ganz.</b>";
+    if(gewinnMissing){
+      msg += " ⚠️ <b>Gewinnauswirkung wurde nicht ausgewählt</b> — denk beim nächsten Mal an die Auswahl rechts!";
+    }
+    msg += " Schau dir die Lösung unten als Karteikarte an.";
+    fb.innerHTML = msg;
     showSolutionCard();
   }
 
@@ -1035,8 +1087,10 @@ function revealSolution(){
   // Ohne Wertung: nur Lösung zeigen
   state.answered = true;
   state.total += 1; // gilt als beantwortet, aber kein Punkt
-  // Diese Karte zählt als "noch nicht 100% richtig" → ins wrongSet
-  wrongSet().add(currentDeckIdx());
+  // Diese Karte zählt als "noch nicht 100% richtig" → ins wrongSet, aus correctSet
+  const ci = currentDeckIdx();
+  wrongSet().add(ci);
+  correctSet().delete(ci);
   updateAllBadges();
   showSolutionCard();
   const fb = document.getElementById("feedback");
