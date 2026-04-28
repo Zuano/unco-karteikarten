@@ -24,7 +24,7 @@
     position:relative}
   .topic-btn:hover{border-color:var(--primary);color:var(--primary)}
   .topic-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
-  .mode-bar{display:flex;gap:8px;margin-bottom:18px}
+  .mode-bar{display:none}
   .mode-btn{flex:1;padding:10px;border:2px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;
     font-size:13px;font-weight:600;color:var(--muted);transition:all .15s;position:relative}
   .mode-btn:hover{color:var(--primary)}
@@ -166,8 +166,8 @@
 
 /* >>> BUILD-INFO: bei JEDER Änderung Version hochzählen + Zeit aktualisieren <<< */
 const BUILD = {
-  version: "v2.1",
-  timestamp: "28.04.2026, 22:30 Uhr (CEST)"
+  version: "v2.2",
+  timestamp: "28.04.2026, 22:46 Uhr (CEST)"
 };
 
 // gemeinsamer Pool von Konto-Optionen für Dropdowns
@@ -237,7 +237,8 @@ const GEWINN_LABELS = {
 const EXERCISES = {
   /* ---------- 1. Rücksendungen ---------- */
   ruecksendung: {
-    fill: [
+    fill: [],
+    drop: [
       bk(
         "Ein Kunde sendet uns Handelswaren im Wert von <b>€ 1.000,00</b> netto + 20 % USt zurück (Originalrechnung schon gebucht). Buche die <b>Rücksendung beim Verkäufer</b>.",
         [
@@ -286,10 +287,8 @@ const EXERCISES = {
         ],
         "Die Rücksendung wurde bereits über 4400/3500 an 2000 gebucht (Forderung ist negativ = Schuld an Kunden). Die Rückzahlung gleicht diese aus: 2000 Lieferforderungen an 2800 Bank.",
         "neutral"
-      )
-    ],
-    drop: [
-      bk(
+      ),
+bk(
         "Wir bekommen Handelswaren um <b>€ 800,00</b> netto + 20 % USt von unserem Kunden zurück. <i>Wähle die richtigen Konten und Beträge:</i>",
         [
           L("Soll",  "4400", 800),
@@ -343,7 +342,8 @@ const EXERCISES = {
 
   /* ---------- 2. Rechnungsausgleich, Mahnspesen, Verzugszinsen ---------- */
   mahnspesen: {
-    fill: [
+    fill: [],
+    drop: [
       bk(
         "Ein Kunde zahlt verspätet. Wir verrechnen ihm <b>€ 15,00 Mahnspesen</b> und <b>€ 12,00 Verzugszinsen</b>. Buche die <b>Belastung beim Verkäufer</b> (Erhöhung der Forderung).",
         [
@@ -393,10 +393,8 @@ const EXERCISES = {
         ],
         "Beim Verkäufer Erträge: 4890 Mahnspesenvergütungen, 8055 Verzugszinsenerträge — Forderung steigt. Mahnspesen und Verzugszinsen sind <b>USt-frei</b>.",
         "erhoehend"
-      )
-    ],
-    drop: [
-      bk(
+      ),
+bk(
         "Wir verrechnen einem säumigen Kunden <b>€ 18,00 Mahnspesen</b> und <b>€ 22,00 Verzugszinsen</b>.",
         [
           L("Soll",  "2000", 40),
@@ -447,13 +445,23 @@ const EXERCISES = {
         ],
         "Beim Verkäufer Erträge auf 4890 + 8055; Forderung 2000 erhöht sich um die Summe.",
         "erhoehend"
+      ),
+      bk(
+        "Wir bezahlen unsere alte Eingangsrechnung in Höhe von <b>€ 540,00</b> brutto per Bank. Vorher hatten wir bereits <b>€ 10,00 Mahnspesen</b> und <b>€ 15,00 Verzugszinsen</b> verrechnet bekommen — die offene Schuld auf 3300 beträgt jetzt <b>€ 565,00</b>. Buche den <b>Bankausgleich</b>.",
+        [
+          L("Soll",  "3300", 565),
+          L("Haben", "2800", 565)
+        ],
+        "Reine Tilgungs-Buchung über die Gesamtsumme: <b>3300 Lieferverbindlichkeiten</b> an <b>2800 Bank</b>. Mahnspesen und Verzugszinsen wurden bereits zuvor als Aufwand gebucht und haben die Schuld erhöht (Buch Ü 1.18, S. 39, B142).",
+        "neutral"
       )
     ]
   },
 
   /* ---------- 3. Kauf Anlagengüter inkl. GWG ---------- */
   anlagen: {
-    fill: [
+    fill: [],
+    drop: [
       bk(
         "Wir kaufen eine <b>neue Maschine</b> auf Ziel um <b>€ 12.000,00</b> netto + 20 % USt.",
         [
@@ -503,10 +511,8 @@ const EXERCISES = {
         ],
         "Achtung — Verbrauchsmaterial ist <b>kein</b> Anlagengut, auch nicht GWG. Direkt auf Aufwandskonto <b>7600 Büromaterial</b>.",
         "vermindernd"
-      )
-    ],
-    drop: [
-      bk(
+      ),
+bk(
         "Wir kaufen einen <b>Lkw um € 35.000,00</b> netto + 20 % USt auf Ziel.",
         [
           L("Soll",  "0640", 35000),
@@ -554,13 +560,24 @@ const EXERCISES = {
         ],
         "Mehrere selbstständig nutzbare Geräte unter je € 1.000 = jedes als GWG. Sofort auf <b>7060 Abschreibungen GWG</b> (Buch S. 9).",
         "vermindernd"
+      ),
+      bk(
+        "Wir kaufen ein <b>Elektrofahrzeug (E-Pkw, 0 g CO₂) um € 35.000,00</b> netto + 20 % USt auf Ziel.",
+        [
+          L("Soll",  "0630", 35000),
+          L("Soll",  "2500",  7000),
+          L("Haben", "3300", 42000)
+        ],
+        "<b>Sonderfall:</b> Elektro-Pkw und Elektro-Kombi (0 g CO₂) bis zu einem Anschaffungswert von <b>€ 40.000 (inkl. USt)</b> sind voll <b>vorsteuerabzugsberechtigt</b> (Buch S. 7). Konto bleibt <b>0630 Pkw und Kombis</b>, aber im Gegensatz zum normalen Pkw wird <b>2500 Vorsteuer</b> mitgebucht.",
+        "neutral"
       )
     ]
   },
 
   /* ---------- 4. Bezugs- und Versandkosten ---------- */
   bezugskosten: {
-    fill: [
+    fill: [],
+    drop: [
       bk(
         "Wir kaufen Handelswaren um <b>€ 4.000,00</b> netto + 20 % USt auf Ziel. Der Lieferant verrechnet zusätzlich <b>€ 200,00</b> netto + 20 % USt <b>Frachtkosten (Bezugskosten)</b>.",
         [
@@ -610,10 +627,8 @@ const EXERCISES = {
         ],
         "Laut Buch S. 15 + Beispiel S. 16/17: Bezugskosten beim Wareneinkauf werden auf <b>5000 HW-Einsatz</b> verbucht — auch wenn es eine separate Speditionsrechnung ist.",
         "vermindernd"
-      )
-    ],
-    drop: [
-      bk(
+      ),
+bk(
         "Wir kaufen Handelswaren um <b>€ 2.500,00</b> netto + 20 % USt; der Lieferant verrechnet zusätzlich <b>€ 100,00</b> netto + 20 % USt für den Transport. Zahlung auf Ziel.",
         [
           L("Soll",  "5000", 2500),
@@ -672,7 +687,7 @@ const EXERCISES = {
    ============================================================ */
 let state = {
   topic: TOPICS[0].id,
-  mode: "fill",            // "fill" | "drop"
+  mode: "drop",            // nur noch Multiple Choice — fill-Modus deaktiviert
   cardIdx: 0,
   score: 0,
   total: 0,
@@ -904,7 +919,7 @@ function render(){
   area.innerHTML = `
     ${banner}
     <div class="card">
-      <h2>${TOPICS.find(t=>t.id===state.topic).label} — ${state.mode==="fill"?"Selbst ausfüllen":"Multiple Choice"}${inReview?" · Wiederholung":""}</h2>
+      <h2>${TOPICS.find(t=>t.id===state.topic).label}${inReview?" · Wiederholung":""}</h2>
       <div class="scenario">${card.scenario}</div>
       <div class="booking-grid">
         <div class="booking-side soll">
@@ -924,10 +939,7 @@ function render(){
           </div>
         </div>
       </div>
-      <p class="hint">${state.mode==="fill"
-        ? "Soll-Konten links, Haben-Konten rechts, Gewinnauswirkung rechts auswählen. Kontonummer (z.B. <b>5000</b>) und Betrag eintragen — Komma oder Punkt funktionieren beide."
-        : "Soll-Konten links, Haben-Konten rechts, Gewinnauswirkung rechts auswählen."
-      }</p>
+      <p class="hint">Soll-Konten links, Haben-Konten rechts, Gewinnauswirkung ganz rechts auswählen. Beträge mit Komma oder Punkt — beides funktioniert.</p>
       <div class="actions">
         <button class="btn btn-primary" id="btnCheck">✓ Prüfen</button>
         <button class="btn btn-secondary" id="btnSkip" title="Lösung anzeigen ohne zu prüfen">💡 Lösung anzeigen</button>
