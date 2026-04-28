@@ -20,14 +20,25 @@
   .container{max-width:920px;margin:0 auto;padding:20px}
   .topic-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
   .topic-btn{flex:1;min-width:180px;padding:14px 12px;border:2px solid var(--line);background:#fff;border-radius:12px;
-    cursor:pointer;font-size:14px;font-weight:600;color:var(--text);text-align:center;transition:all .15s}
+    cursor:pointer;font-size:14px;font-weight:600;color:var(--text);text-align:center;transition:all .15s;
+    position:relative}
   .topic-btn:hover{border-color:var(--primary);color:var(--primary)}
   .topic-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
   .mode-bar{display:flex;gap:8px;margin-bottom:18px}
   .mode-btn{flex:1;padding:10px;border:2px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;
-    font-size:13px;font-weight:600;color:var(--muted);transition:all .15s}
+    font-size:13px;font-weight:600;color:var(--muted);transition:all .15s;position:relative}
   .mode-btn:hover{color:var(--primary)}
   .mode-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .badge{position:absolute;top:-8px;right:-8px;background:var(--bad);color:#fff;border-radius:999px;
+    padding:2px 7px;font-size:11px;font-weight:700;min-width:22px;text-align:center;
+    box-shadow:0 2px 4px rgba(0,0,0,.15);border:2px solid #fff}
+  .review-banner{margin-bottom:14px;padding:12px 14px;border-radius:10px;background:#fff7ed;
+    color:#9a3412;border:1px solid #fed7aa;font-size:13px;display:flex;justify-content:space-between;
+    align-items:center;flex-wrap:wrap;gap:8px}
+  .review-banner b{color:#7c2d12}
+  .review-banner .btn{padding:6px 12px;font-size:12px}
+  .summary .actions{justify-content:center;flex-direction:column;align-items:stretch;max-width:340px;margin:0 auto}
+  .summary .actions .btn{width:100%}
   .progress{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
     font-size:13px;color:var(--muted);font-weight:500}
   .progress-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:18px}
@@ -143,7 +154,7 @@
 </div>
 
 <footer>
-  UNCO Karteikarten · 2. SBO 30.04.2026 · <code>v1.5</code> · Stand: 27.04.2026, 11:45 Uhr (CEST)
+  UNCO Karteikarten · 2. SBO 30.04.2026 · <code>v1.6</code> · Stand: 27.04.2026, 12:15 Uhr (CEST)
 </footer>
 
 <script>
@@ -658,11 +669,28 @@ let state = {
   score: 0,
   total: 0,
   answered: false,
-  selectedGewinn: null     // "erhoehend" | "vermindernd" | "neutral" | null
+  selectedGewinn: null,    // "erhoehend" | "vermindernd" | "neutral" | null
+  subset: null,            // im Review-Modus: Array von Indizes; sonst null
+  wrongByDeck: {}          // { "topic_mode": Set<cardIdx> }
 };
 
 function deck(){ return EXERCISES[state.topic][state.mode]; }
-function currentCard(){ return deck()[state.cardIdx]; }
+function deckKey(){ return state.topic + "_" + state.mode; }
+function deckKeyFor(topic, mode){ return topic + "_" + mode; }
+function wrongSet(){
+  if(!state.wrongByDeck[deckKey()]) state.wrongByDeck[deckKey()] = new Set();
+  return state.wrongByDeck[deckKey()];
+}
+function wrongCountFor(topic, mode){
+  const s = state.wrongByDeck[deckKeyFor(topic, mode)];
+  return s ? s.size : 0;
+}
+function topicWrongCount(topic){
+  return wrongCountFor(topic, "fill") + wrongCountFor(topic, "drop");
+}
+function totalCards(){ return state.subset ? state.subset.length : deck().length; }
+function currentDeckIdx(){ return state.subset ? state.subset[state.cardIdx] : state.cardIdx; }
+function currentCard(){ return deck()[currentDeckIdx()]; }
 
 const fmt = n => {
   // 1.000,00 oder 4,90 etc.
@@ -680,18 +708,20 @@ function buildTopicBar(){
   TOPICS.forEach(t=>{
     const b = document.createElement("button");
     b.className = "topic-btn"+(t.id===state.topic?" active":"");
-    b.textContent = t.label;
+    b.dataset.topic = t.id;
+    b.innerHTML = `<span class="topic-label">${t.label}</span>`;
     b.onclick = ()=>{
       if(state.topic === t.id) return;
       state.topic = t.id;
-      // Active-Klasse direkt auf alle Topic-Buttons aktualisieren
       bar.querySelectorAll(".topic-btn").forEach(x=>x.classList.remove("active"));
       b.classList.add("active");
       resetDeck();
       render();
+      updateAllBadges();
     };
     bar.appendChild(b);
   });
+  updateAllBadges();
 }
 
 function setMode(m){
@@ -701,9 +731,51 @@ function setMode(m){
   document.getElementById("modeDrop").classList.toggle("active",m==="drop");
   resetDeck();
   render();
+  updateAllBadges();
 }
 
-function resetDeck(){ state.cardIdx=0; state.score=0; state.total=0; state.answered=false; state.selectedGewinn=null; }
+function setBadge(el, count){
+  let badge = el.querySelector(".badge");
+  if(count > 0){
+    if(!badge){ badge = document.createElement("span"); badge.className = "badge"; el.appendChild(badge); }
+    badge.textContent = count;
+  } else if(badge){
+    badge.remove();
+  }
+}
+function updateAllBadges(){
+  // Topic-Buttons: Summe falscher Karten beider Modi
+  document.querySelectorAll("#topicBar .topic-btn").forEach(b=>{
+    setBadge(b, topicWrongCount(b.dataset.topic));
+  });
+  // Mode-Buttons: nur des aktuellen Topics
+  setBadge(document.getElementById("modeFill"), wrongCountFor(state.topic, "fill"));
+  setBadge(document.getElementById("modeDrop"), wrongCountFor(state.topic, "drop"));
+}
+
+function resetDeck(){ state.cardIdx=0; state.score=0; state.total=0; state.answered=false; state.selectedGewinn=null; state.subset=null; }
+
+function startReview(){
+  const wrongs = Array.from(wrongSet()).sort((a,b)=>a-b);
+  if(!wrongs.length){ render(); return; }
+  state.subset = wrongs;
+  state.cardIdx = 0;
+  state.score = 0;
+  state.total = 0;
+  state.answered = false;
+  state.selectedGewinn = null;
+  render();
+  updateAllBadges();
+}
+function exitReview(){
+  state.subset = null;
+  state.cardIdx = 0;
+  state.score = 0;
+  state.total = 0;
+  state.answered = false;
+  state.selectedGewinn = null;
+  render();
+}
 
 function buildSelect(name, value){
   // dropdown mit allen Konten
@@ -713,29 +785,51 @@ function buildSelect(name, value){
 
 function render(){
   const area = document.getElementById("cardArea");
-  const total = deck().length;
+  const total = totalCards();
   const idx = state.cardIdx;
+  const inReview = !!state.subset;
 
   // wichtig: bei jedem neuen Render eine "frische" Karte → state zurücksetzen
   state.answered = false;
   state.selectedGewinn = null;
 
   // progress
-  document.getElementById("progressText").textContent = `Karte ${Math.min(idx+1,total)} / ${total}`;
+  const reviewLabel = inReview ? " (Wiederholung)" : "";
+  document.getElementById("progressText").textContent = `Karte ${Math.min(idx+1,total)} / ${total}${reviewLabel}`;
   document.getElementById("scoreText").textContent = `Punkte: ${state.score} / ${state.total}`;
   document.getElementById("progressFill").style.width = `${((idx)/total)*100}%`;
 
   // Übung abgeschlossen?
   if(idx>=total){
+    const remainingWrong = wrongSet().size;
+    const heading = inReview ? "Wiederholung abgeschlossen ✅" : "Übung abgeschlossen 🎉";
+    let message;
+    if(state.score===state.total && state.total>0){
+      message = inReview
+        ? "Super — alle Wiederholungs-Karten jetzt richtig gelöst!"
+        : "Perfekt! Alle Buchungssätze richtig.";
+    } else if(state.score>=state.total*0.7){
+      message = "Gut gemacht — fast alles richtig.";
+    } else {
+      message = "Noch ein bisschen üben — du schaffst das!";
+    }
+    let actions = "";
+    if(remainingWrong > 0){
+      actions += `<button class="btn btn-primary" onclick="startReview()">🎯 Nur falsche Karten wiederholen (${remainingWrong})</button>`;
+    }
+    if(inReview){
+      actions += `<button class="btn btn-secondary" onclick="exitReview()">↩︎ Zurück zu allen ${deck().length} Karten</button>`;
+    } else {
+      actions += `<button class="btn btn-secondary" onclick="resetDeck();render()">🔁 Übung nochmal starten (alle ${deck().length})</button>`;
+    }
     area.innerHTML = `<div class="card summary">
-      <h2>Übung abgeschlossen 🎉</h2>
+      <h2>${heading}</h2>
       <div class="score">${state.score} / ${state.total}</div>
-      <p>${state.score===state.total?"Perfekt! Alle Buchungssätze richtig.":state.score>=state.total*0.7?"Gut gemacht — fast alles richtig.":"Noch ein bisschen üben — du schaffst das!"}</p>
-      <div class="actions" style="justify-content:center">
-        <button class="btn btn-primary" onclick="resetDeck();render()">🔁 Übung nochmal starten</button>
-      </div>
+      <p>${message}</p>
+      <div class="actions">${actions}</div>
     </div>`;
     document.getElementById("progressFill").style.width="100%";
+    updateAllBadges();
     return;
   }
 
@@ -759,9 +853,19 @@ function render(){
   const habenRows = lines.map((l,i)=>l.side==="Haben" ? buildRow(l,i) : null).filter(Boolean).join("")
                   || `<div class="booking-row empty">— keine Buchung im Haben —</div>`;
 
+  // Banner: offene Karten aus früherem Versuch
+  const wrongs = wrongSet().size;
+  const banner = (!inReview && wrongs > 0 && idx === 0)
+    ? `<div class="review-banner">
+         <span>📝 Du hast in dieser Übung noch <b>${wrongs}</b> Karte${wrongs===1?'':'n'} aus dem letzten Versuch offen.</span>
+         <button class="btn btn-primary" onclick="startReview()">🎯 Nur diese ${wrongs} wiederholen</button>
+       </div>`
+    : "";
+
   area.innerHTML = `
+    ${banner}
     <div class="card">
-      <h2>${TOPICS.find(t=>t.id===state.topic).label} — ${state.mode==="fill"?"Selbst ausfüllen":"Multiple Choice"}</h2>
+      <h2>${TOPICS.find(t=>t.id===state.topic).label} — ${state.mode==="fill"?"Selbst ausfüllen":"Multiple Choice"}${inReview?" · Wiederholung":""}</h2>
       <div class="scenario">${card.scenario}</div>
       <div class="booking-grid">
         <div class="booking-side soll">
@@ -862,6 +966,12 @@ function checkCard(){
   });
   if(!gewinnOK) allCorrect = false;
 
+  // Karten-Tracking: falsche Karte merken / richtige aus wrongSet entfernen
+  const cardIdx = currentDeckIdx();
+  if(allCorrect){ wrongSet().delete(cardIdx); }
+  else          { wrongSet().add(cardIdx); }
+  updateAllBadges();
+
   state.total += 1;
   if(allCorrect) state.score += 1;
   state.answered = true;
@@ -921,6 +1031,9 @@ function revealSolution(){
   // Ohne Wertung: nur Lösung zeigen
   state.answered = true;
   state.total += 1; // gilt als beantwortet, aber kein Punkt
+  // Diese Karte zählt als "noch nicht 100% richtig" → ins wrongSet
+  wrongSet().add(currentDeckIdx());
+  updateAllBadges();
   showSolutionCard();
   const fb = document.getElementById("feedback");
   fb.classList.add("show","bad");
