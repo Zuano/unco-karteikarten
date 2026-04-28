@@ -166,8 +166,8 @@
 
 /* >>> BUILD-INFO: bei JEDER Änderung Version hochzählen + Zeit aktualisieren <<< */
 const BUILD = {
-  version: "v1.9",
-  timestamp: "28.04.2026, 14:30 Uhr (CEST)"
+  version: "v2.0",
+  timestamp: "28.04.2026, 22:11 Uhr (CEST)"
 };
 
 // gemeinsamer Pool von Konto-Optionen für Dropdowns
@@ -241,11 +241,11 @@ const EXERCISES = {
       bk(
         "Ein Kunde sendet uns Handelswaren im Wert von <b>€ 1.000,00</b> netto + 20 % USt zurück (Originalrechnung schon gebucht). Buche die <b>Rücksendung beim Verkäufer</b>.",
         [
-          L("Soll",  "4400", 1000),
+          L("Soll",  "4000", 1000),
           L("Soll",  "3500",  200),
           L("Haben", "2000", 1200)
         ],
-        "Bei Rücksendung an uns wird der ursprüngliche Erlös rückgängig gemacht: <b>4400 Erlösberichtigungen 20 %</b> + <b>3500 Umsatzsteuer</b> an <b>2000 Lieferforderungen</b>.",
+        "Beim Verkäufer wird der Verkauf direkt storniert (Buch S. 5): <b>4000 HW-Erlöse</b> + <b>3500 Umsatzsteuer</b> an <b>2000 Lieferforderungen</b>. <i>4400 Erlösberichtigung wird laut Buch erst bei nachträglichen Rabatten verwendet (Lerneinheit 4).</i>",
         "vermindernd"
       ),
       bk(
@@ -261,11 +261,11 @@ const EXERCISES = {
       bk(
         "Ein Kunde reklamiert Waren um <b>€ 250,00</b> netto + 20 % USt und sendet sie zurück; die Rechnung wurde noch nicht bezahlt. Wie lautet der Buchungssatz beim Verkäufer?",
         [
-          L("Soll",  "4400", 250),
+          L("Soll",  "4000", 250),
           L("Soll",  "3500",  50),
           L("Haben", "2000", 300)
         ],
-        "Achtung: Auch wenn noch nicht bezahlt wurde, reduziert sich die Forderung (2000) um den Bruttobetrag, weil der Kunde nun weniger schuldet.",
+        "Direkter Storno auf <b>4000</b> (Buch S. 5). Auch wenn noch nicht bezahlt wurde: die Forderung 2000 reduziert sich um den Bruttobetrag.",
         "vermindernd"
       ),
       bk(
@@ -292,11 +292,11 @@ const EXERCISES = {
       bk(
         "Wir bekommen Handelswaren um <b>€ 800,00</b> netto + 20 % USt von unserem Kunden zurück. <i>Wähle die richtigen Konten und Beträge:</i>",
         [
-          L("Soll",  "4400", 800),
+          L("Soll",  "4000", 800),
           L("Soll",  "3500", 160),
           L("Haben", "2000", 960)
         ],
-        "Erlösberichtigung 4400 + Umsatzsteuer 3500 an Lieferforderungen 2000 (Bruttobetrag).",
+        "Direkter Storno auf <b>4000 HW-Erlöse</b> + <b>3500 USt</b> an <b>2000 Lieferforderungen</b> (Buch S. 5).",
         "vermindernd"
       ),
       bk(
@@ -312,11 +312,11 @@ const EXERCISES = {
       bk(
         "Ein Kunde meldet Mängel und sendet Waren um <b>€ 2.000,00</b> netto + 20 % USt zurück.",
         [
-          L("Soll",  "4400", 2000),
+          L("Soll",  "4000", 2000),
           L("Soll",  "3500",  400),
           L("Haben", "2000", 2400)
         ],
-        "Bruttowert € 2.400,- mindert die Forderung.",
+        "Direkter Storno auf <b>4000 HW-Erlöse</b> + <b>3500 USt</b> (Buch S. 5). Bruttowert € 2.400 mindert die Forderung 2000.",
         "vermindernd"
       ),
       bk(
@@ -465,33 +465,34 @@ const EXERCISES = {
         "neutral"
       ),
       bk(
-        "Wir kaufen einen <b>Bürodrucker um € 600,00</b> netto + 20 % USt auf Ziel. Buche den Kauf <b>als geringwertiges Wirtschaftsgut (GWG)</b>.",
+        "Wir kaufen einen <b>Bürodrucker um € 600,00</b> netto + 20 % USt auf Ziel. Buche den Kauf als <b>GWG (sofort abschreiben)</b>.",
         [
-          L("Soll",  "0672", 600),
+          L("Soll",  "7060", 600),
           L("Soll",  "2500", 120),
           L("Haben", "3300", 720)
         ],
-        "GWG ≤ € 1.000 netto → eigenes GWG-Anlagenkonto: hier <b>0672 Geringwertige Büromaschinen, EDV-Anlagen</b>. Anschließend wird das GWG sofort voll abgeschrieben (siehe nächste Karte).",
-        "neutral"
-      ),
-      bk(
-        "Sofortige <b>Vollabschreibung</b> des soeben gekauften GWG (Bürodrucker € 600,-).",
-        [
-          L("Soll",  "7060", 600),
-          L("Haben", "0672", 600)
-        ],
-        "Die Vollabschreibung des GWG erfolgt im Anschaffungsjahr: <b>7060 Abschreibungen geringwertiger Wirtschaftsgüter</b> an das GWG-Anlagenkonto.",
+        "Laut UNCO-Buch S. 9 Methode 1 wird das GWG <b>sofort beim Kauf</b> auf <b>7060 Abschreibungen geringwertiger Wirtschaftsgüter</b> abgeschrieben — kein Umweg über ein Klasse-0-Konto.",
         "vermindernd"
       ),
       bk(
-        "Wir kaufen einen <b>Werkzeugsatz um € 850,00</b> netto + 20 % USt auf Ziel und behandeln ihn als GWG.",
+        "Wir kaufen einen <b>Computer um € 1.500,00</b> netto + 20 % USt auf Ziel.",
         [
-          L("Soll",  "0550", 850),
+          L("Soll",  "0620", 1500),
+          L("Soll",  "2500",  300),
+          L("Haben", "3300", 1800)
+        ],
+        "Computer > € 1.000 netto = echtes Anlagengut. Buchung: <b>0620 Büromaschinen, EDV-Anlagen</b> + <b>2500 Vorsteuer</b> an <b>3300 Lieferverbindlichkeiten</b>.",
+        "neutral"
+      ),
+      bk(
+        "Wir kaufen einen <b>Werkzeugsatz um € 850,00</b> netto + 20 % USt auf Ziel (GWG, sofort abschreiben).",
+        [
+          L("Soll",  "7060", 850),
           L("Soll",  "2500", 170),
           L("Haben", "3300", 1020)
         ],
-        "GWG ≤ € 1.000 netto → eigenes GWG-Konto: <b>0550 Geringwertige Werkzeuge</b>. Vorsteuer auf den Nettowert.",
-        "neutral"
+        "GWG ≤ € 1.000 netto → laut Buch S. 9 sofort auf <b>7060 Abschreibungen GWG</b>. Vorsteuer auf den Nettowert.",
+        "vermindernd"
       ),
       bk(
         "Wir kaufen <b>Büromaterial um € 120,00</b> netto + 20 % USt bar (kein Anlagengut!).",
@@ -516,43 +517,43 @@ const EXERCISES = {
         "neutral"
       ),
       bk(
-        "Wir kaufen <b>5 Bürostühle um je € 180,00</b> netto + 20 % USt (Summe netto € 900,-) auf Ziel und behandeln sie als GWG.",
+        "Wir kaufen <b>5 Bürostühle um je € 180,00</b> netto + 20 % USt (Summe netto € 900,-) auf Ziel — als GWG (sofort abschreiben).",
         [
-          L("Soll",  "0670", 900),
+          L("Soll",  "7060", 900),
           L("Soll",  "2500", 180),
           L("Haben", "3300", 1080)
         ],
-        "GWG der Betriebs- und Geschäftsausstattung → Konto <b>0670</b>. (Sofortige Abschreibung über 7060 erfolgt anschließend.)",
-        "neutral"
-      ),
-      bk(
-        "Sofortige <b>Vollabschreibung der GWG-Bürostühle</b> aus der vorigen Aufgabe (€ 900,-).",
-        [
-          L("Soll",  "7060", 900),
-          L("Haben", "0670", 900)
-        ],
-        "Die GWG werden im Jahr der Anschaffung voll abgeschrieben.",
+        "GWG ≤ € 1.000 netto → laut Buch S. 9 sofort auf <b>7060 Abschreibungen GWG</b>, kein Umweg über 0670.",
         "vermindernd"
       ),
       bk(
-        "Wir kaufen ein neues <b>Datenverarbeitungsprogramm um € 480,00</b> netto + 20 % USt auf Ziel (GWG).",
+        "Wir kaufen einen <b>Pkw um € 30.000,00</b> netto + 20 % USt auf Ziel.",
         [
-          L("Soll",  "0121", 480),
-          L("Soll",  "2500",  96),
-          L("Haben", "3300", 576)
+          L("Soll",  "0630", 36000),
+          L("Haben", "3300", 36000)
         ],
-        "Software ist immaterielles Anlagengut. Da unter € 1.000 → GWG: <b>0121 Geringwertige Datenverarbeitungsprogramme</b>.",
+        "<b>Achtung — Pkw:</b> Bei Pkw und Kombi gibt es <b>keinen Vorsteuerabzug</b> (Buch S. 7). Der gesamte <b>Bruttobetrag (€ 36.000)</b> wird auf <b>0630 Pkw und Kombis</b> aktiviert. Kein 2500 Vorsteuer in der Buchung!",
         "neutral"
       ),
       bk(
-        "Wir kaufen <b>3 Akkubohrer für je € 320,00</b> netto + 20 % USt (Summe netto € 960,-) auf Ziel — als GWG.",
+        "Wir kaufen ein neues <b>Datenverarbeitungsprogramm um € 480,00</b> netto + 20 % USt auf Ziel (GWG, sofort abschreiben).",
         [
-          L("Soll",  "0550", 960),
+          L("Soll",  "7060", 480),
+          L("Soll",  "2500",  96),
+          L("Haben", "3300", 576)
+        ],
+        "Software-GWG ≤ € 1.000 → laut Buch S. 9 sofort auf <b>7060 Abschreibungen GWG</b>.",
+        "vermindernd"
+      ),
+      bk(
+        "Wir kaufen <b>3 Akkubohrer für je € 320,00</b> netto + 20 % USt (Summe netto € 960,-) auf Ziel — als GWG (sofort abschreiben).",
+        [
+          L("Soll",  "7060", 960),
           L("Soll",  "2500", 192),
           L("Haben", "3300", 1152)
         ],
-        "Mehrere selbstständig nutzbare Geräte unter je € 1.000 = GWG. Werkzeuge → <b>0550 Geringwertige Werkzeuge</b>.",
-        "neutral"
+        "Mehrere selbstständig nutzbare Geräte unter je € 1.000 = jedes als GWG. Sofort auf <b>7060 Abschreibungen GWG</b> (Buch S. 9).",
+        "vermindernd"
       )
     ]
   },
@@ -564,21 +565,21 @@ const EXERCISES = {
         "Wir kaufen Handelswaren um <b>€ 4.000,00</b> netto + 20 % USt auf Ziel. Der Lieferant verrechnet zusätzlich <b>€ 200,00</b> netto + 20 % USt <b>Frachtkosten (Bezugskosten)</b>.",
         [
           L("Soll",  "5000", 4000),
-          L("Soll",  "5600",  200),
+          L("Soll",  "5000",  200),
           L("Soll",  "2500",  840),
           L("Haben", "3300", 5040)
         ],
-        "Eingehende Frachten beim <b>Wareneinkauf</b> sind <b>5600 Bezugskosten</b>. Die Vorsteuer wird auf den Gesamtbetrag (4.000 + 200 = 4.200) berechnet → 840.",
+        "Laut Buch S. 15: <b>Bezugskosten werden auf demselben Konto verbucht wie der Wareneinkauf — also 5000 HW-Einsatz</b>. Vorsteuer auf den Gesamtbetrag (4.000 + 200 = 4.200) → 840.",
         "vermindernd"
       ),
       bk(
-        "Wir verkaufen Handelswaren um <b>€ 3.000,00</b> netto + 20 % USt. Der Versand kostet uns <b>€ 80,00</b> netto + 20 % USt; das Paketservice (Post) verrechnen wir bar.",
+        "Wir verkaufen Handelswaren um <b>€ 3.000,00</b> netto + 20 % USt. Der Versand mit DHL kostet uns <b>€ 80,00</b> netto + 20 % USt; wir zahlen bar.",
         [
           L("Soll",  "7310", 80),
           L("Soll",  "2500", 16),
           L("Haben", "2700", 96)
         ],
-        "Versandkosten beim <b>Verkauf</b> sind kein Bezugskonto, sondern <b>7310 Paketgebühren 20 %</b> (Aufwand). Vorsteuer 20 % vom Versand. Bar bezahlt → 2700 Kassa.",
+        "Versandkosten beim <b>Verkauf</b> sind <b>7310 Paketgebühren 20 %</b> (Aufwand) — Buch S. 19 zeigt für Spedition 7300 bzw. für Paketdienste mit USt 7310. Bar bezahlt → 2700 Kassa.",
         "vermindernd"
       ),
       bk(
@@ -603,11 +604,11 @@ const EXERCISES = {
       bk(
         "Eine Spedition liefert uns Handelswaren und stellt uns <b>€ 250,00</b> netto + 20 % USt <b>Bezugsfracht</b> in Rechnung. Bezahlung mit Bank.",
         [
-          L("Soll",  "5600", 250),
+          L("Soll",  "5000", 250),
           L("Soll",  "2500",  50),
           L("Haben", "2800", 300)
         ],
-        "Reine Bezugskostenrechnung der Spedition (ohne Warenwert). 5600 Bezugskosten + 2500 Vorsteuer an 2800 Bank.",
+        "Laut Buch S. 15 + Beispiel S. 16/17: Bezugskosten beim Wareneinkauf werden auf <b>5000 HW-Einsatz</b> verbucht — auch wenn es eine separate Speditionsrechnung ist.",
         "vermindernd"
       )
     ],
@@ -616,11 +617,11 @@ const EXERCISES = {
         "Wir kaufen Handelswaren um <b>€ 2.500,00</b> netto + 20 % USt; der Lieferant verrechnet zusätzlich <b>€ 100,00</b> netto + 20 % USt für den Transport. Zahlung auf Ziel.",
         [
           L("Soll",  "5000", 2500),
-          L("Soll",  "5600",  100),
+          L("Soll",  "5000",  100),
           L("Soll",  "2500",  520),
           L("Haben", "3300", 3120)
         ],
-        "Eingehende Frachten = 5600 Bezugskosten.",
+        "Bezugskosten + Wareneinkauf gehen <b>beide auf 5000</b> (Buch S. 15).",
         "vermindernd"
       ),
       bk(
