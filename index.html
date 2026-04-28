@@ -153,15 +153,19 @@
   <div id="cardArea"></div>
 </div>
 
-<footer>
-  UNCO Karteikarten · 2. SBO 30.04.2026 · <code>v1.6</code> · Stand: 27.04.2026, 12:15 Uhr (CEST)
-</footer>
+<footer id="footer"></footer>
 
 <script>
 /* ============================================================
    UNCO Karteikarten — Daten
    Buchungen folgen dem Kontenplan 2. Semester (2AHB)
    ============================================================ */
+
+/* >>> BUILD-INFO: bei JEDER Änderung Version hochzählen + Zeit aktualisieren <<< */
+const BUILD = {
+  version: "v1.7",
+  timestamp: "28.04.2026, 10:38 Uhr (CEST)"
+};
 
 // gemeinsamer Pool von Konto-Optionen für Dropdowns
 const KONTEN = {
@@ -1049,6 +1053,10 @@ document.getElementById("modeFill").onclick = ()=>setMode("fill");
 document.getElementById("modeDrop").onclick = ()=>setMode("drop");
 buildTopicBar();
 render();
+
+// Footer aus zentraler BUILD-Konstante füllen
+document.getElementById("footer").innerHTML =
+  `UNCO Karteikarten · 2. SBO 30.04.2026 · <code>${BUILD.version}</code> · Stand: ${BUILD.timestamp}`;
 </script>
 </body>
 </html>
