@@ -2,8 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>UNCO Karteikarten – 2. SBO 30.04.2026</title>
+<title>UNCO Karteikarten – Buch UNCO 2. Sem. S. 38–61 (Rechnungsausgleich)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="favicon.png">
 <style>
   :root{
     --bg:#f4f6fb; --card:#ffffff; --primary:#1e40af; --primary-dark:#1e3a8a;
@@ -138,8 +141,8 @@
 </head>
 <body>
 <header>
-  <h1>UNCO Karteikarten — 2. SBO am 30.04.2026</h1>
-  <p>Übungen zu: Rücksendungen · Rechnungsausgleich/Mahnspesen/Verzugszinsen · Anlagengüter inkl. GWG · Bezugs- und Versandkosten</p>
+  <h1>UNCO Karteikarten — Buch UNCO 2. Sem. S. 38–61</h1>
+  <p>Lerneinheit 5: Rechnungsausgleich verbuchen · Können-Aufgabe Anlagengüter/GWG · 7 Kapitel</p>
 </header>
 
 <div class="container">
@@ -166,56 +169,55 @@
 
 /* >>> BUILD-INFO: bei JEDER Änderung Version hochzählen + Zeit aktualisieren <<< */
 const BUILD = {
-  version: "v2.2",
-  timestamp: "28.04.2026, 22:46 Uhr (CEST)"
+  // Bei JEDER Änderung Version hochzählen + aktuelle Uhrzeit aus
+  // `TZ="Europe/Vienna" date "+%d.%m.%Y, %H:%M Uhr (%Z)"` einsetzen.
+  version: "v1.2",
+  timestamp: "04.05.2026, 11:27 Uhr (CEST)"
 };
 
 // gemeinsamer Pool von Konto-Optionen für Dropdowns
 const KONTEN = {
-  // häufig im Einsatz
-  "—": "—",
-  "0120": "0120 Datenverarbeitungsprogramme",
-  "0121": "0121 Geringwertige Datenverarbeitungsprogramme",
-  "0400": "0400 Maschinen",
-  "0480": "0480 Geringwertige Maschinen",
-  "0500": "0500 Werkzeuge",
-  "0550": "0550 Geringwertige Werkzeuge",
+  // Klasse 0 — Anlagevermögen
   "0600": "0600 Betriebs- und Geschäftsausstattung",
   "0620": "0620 Büromaschinen, EDV-Anlagen",
-  "0630": "0630 Pkw und Kombis",
   "0640": "0640 Lkw",
-  "0670": "0670 Geringwertige Betriebs- und Geschäftsausstattung",
-  "0672": "0672 Geringwertige Büromaschinen, EDV-Anlagen",
+  // Klasse 2 — Forderungen / Finanzvermögen
   "2000": "2000 Lieferforderungen",
   "2500": "2500 Vorsteuer",
   "2700": "2700 Kassa",
   "2800": "2800 Bank",
+  "2880": "2880 Forderungen Kreditkartenunternehmen",
+  "2885": "2885 Forderungen Debitkarten",
+  // Klasse 3 — Verbindlichkeiten
+  "3180": "3180 Verbindlichkeiten Kreditkartenunternehmen",
+  "3190": "3190 Verbindlichkeiten Debitkarten",
   "3300": "3300 Lieferverbindlichkeiten",
   "3500": "3500 Umsatzsteuer",
+  // Klasse 4 — Erlöse / Erträge
   "4000": "4000 Handelswarenerlöse 20%",
-  "4400": "4400 Erlösberichtigungen 20%",
   "4410": "4410 Kundenskonti 20%",
   "4890": "4890 Mahnspesenvergütungen",
+  // Klasse 5 — Wareneinsatz
   "5000": "5000 Handelswareneinsatz 20%",
-  "5600": "5600 Bezugskosten",
   "5880": "5880 Lieferantenskonti auf Wareneinkauf 20%",
-  "7060": "7060 Abschreibungen geringwertiger Wirtschaftsgüter",
-  "7240": "7240 Heizölverbrauch",
-  "7270": "7270 Stromverbrauch",
-  "7300": "7300 Ausgangsfrachten 20%",
-  "7310": "7310 Paketgebühren 20%",
-  "7385": "7385 Portogebühren",
-  "7600": "7600 Büromaterial",
+  // Klasse 7 — Sonstige betriebliche Aufwendungen
+  "7060": "7060 Abschreibungen geringwertiger Wirtschaftsgüter (GWG)",
+  "7330": "7330 Lkw-Betriebsaufwand",
+  "7650": "7650 Werbeaufwand",
+  "7792": "7792 Provisionen, Gebühren Kredit- und Debitkarten",
+  // Klasse 8 — Finanzerträge / Finanzaufwendungen
   "8055": "8055 Verzugszinsenerträge",
   "8320": "8320 Verzugszinsenaufwand",
   "8321": "8321 Mahnspesen"
 };
 
 const TOPICS = [
-  { id:"ruecksendung", label:"1. Rücksendungen" },
-  { id:"mahnspesen",   label:"2. Rechnungsausgleich, Mahnspesen, Verzugszinsen" },
-  { id:"anlagen",      label:"3. Kauf Anlagengüter inkl. GWG" },
-  { id:"bezugskosten", label:"4. Bezugs- und Versandkosten" }
+  { id:"mahn",          label:"1. Mahnspesen & Verzugszinsen" },
+  { id:"karte_kauf",    label:"2. Kredit-/Debitkarte – Käufer" },
+  { id:"karte_verk",    label:"3. Kredit-/Debitkarte – Verkäufer" },
+  { id:"lief_skonto",   label:"4. Lieferantenskonto" },
+  { id:"kund_skonto",   label:"5. Kundenskonto" },
+  { id:"sofort_skonto", label:"6. Sofortiger Skontoabzug" }
 ];
 
 /* Hilfsfunktion zum schnellen Bauen einer Buchungssatz-Karte */
@@ -235,459 +237,418 @@ const GEWINN_LABELS = {
    ÜBUNGEN
    ============================================================ */
 const EXERCISES = {
-  /* ---------- 1. Rücksendungen ---------- */
-  ruecksendung: {
+  /* ============================================================
+     KAPITEL 1 — MAHNSPESEN & VERZUGSZINSEN  (Buch S. 39)
+     ============================================================ */
+  mahn: {
     fill: [],
     drop: [
       bk(
-        "Ein Kunde sendet uns Handelswaren im Wert von <b>€ 1.000,00</b> netto + 20 % USt zurück (Originalrechnung schon gebucht). Buche die <b>Rücksendung beim Verkäufer</b>.",
+        "<b>Käufer:</b> Sonstiger Beleg S319 — die Johann Krammer GmbH (33300) belastet uns mit <b>€ 10,00 Mahnspesen</b> für die offene Eingangsrechnung E878.",
         [
-          L("Soll",  "4400", 1000),
-          L("Soll",  "3500",  200),
-          L("Haben", "2000", 1200)
+          L("Soll",  "8321", 10),
+          L("Haben", "3300", 10)
         ],
-        "Erlösminderung beim Verkäufer (Buch S. 30–31, Lerneinheit 4): <b>4400 Erlösberichtigungen 20 %</b> + <b>3500 Umsatzsteuer</b> an <b>2000 Lieferforderungen</b>. Die Erlöse werden weniger, deshalb ist 4400 im Soll.",
+        "Beim Käufer sind Mahnspesen ein Finanzaufwand: 8321 Mahnspesen / 33… Lieferantenkonto. Mahnspesen unterliegen NICHT der USt.",
         "vermindernd"
       ),
       bk(
-        "Wir senden an unseren Lieferanten gekaufte Handelswaren im Wert von <b>€ 500,00</b> netto + 20 % USt zurück. Buche die <b>Rücksendung beim Käufer</b>.",
+        "<b>Käufer:</b> Sonstiger Beleg S319 — die Johann Krammer GmbH (33300) stellt uns zusätzlich <b>€ 15,00 Verzugszinsen</b> für die verspätete Zahlung in Rechnung.",
         [
-          L("Soll",  "3300", 600),
-          L("Haben", "5000", 500),
-          L("Haben", "2500", 100)
+          L("Soll",  "8320", 15),
+          L("Haben", "3300", 15)
         ],
-        "Beim Käufer wird der Wareneinsatz storniert: <b>3300 Lieferverbindlichkeiten</b> an <b>5000 Handelswareneinsatz 20 %</b> + <b>2500 Vorsteuer</b>.",
-        "erhoehend"
-      ),
-      bk(
-        "Ein Kunde reklamiert Waren um <b>€ 250,00</b> netto + 20 % USt und sendet sie zurück; die Rechnung wurde noch nicht bezahlt. Wie lautet der Buchungssatz beim Verkäufer?",
-        [
-          L("Soll",  "4400", 250),
-          L("Soll",  "3500",  50),
-          L("Haben", "2000", 300)
-        ],
-        "Erlösberichtigung 4400 + USt-Korrektur 3500 an Lieferforderungen 2000. Auch wenn noch nicht bezahlt wurde: die Forderung 2000 reduziert sich um den Bruttobetrag.",
+        "Verzugszinsen beim Käufer: 8320 Verzugszinsenaufwand / 33… Lieferantenkonto. Auch ohne USt.",
         "vermindernd"
       ),
       bk(
-        "Wir senden beschädigte Handelswaren um <b>€ 1.200,00</b> netto + 20 % USt an den Lieferanten zurück (Rechnung noch offen).",
+        "<b>Verkäufer:</b> Sonstiger Beleg S321 — wir belasten den Kunden Jürgen Rabenberger e.U. (2000) mit <b>€ 20,00 Verzugszinsen</b> für die noch offene A1245 über € 1.420,00.",
         [
-          L("Soll",  "3300", 1440),
-          L("Haben", "5000", 1200),
-          L("Haben", "2500",  240)
+          L("Soll",  "2000", 20),
+          L("Haben", "8055", 20)
         ],
-        "Beim Käufer: 3300 Lieferverbindlichkeiten an 5000 Handelswareneinsatz + 2500 Vorsteuer (Bruttobetrag mindert die Verbindlichkeit).",
+        "Beim Verkäufer sind Verzugszinsen ein Ertrag: 20… Kundenkonto / 8055 Verzugszinsenerträge. Achtung: Mahnspesen-Asymmetrie — Käufer 8321 (Klasse 8 = Aufwand), Verkäufer 4890 (Klasse 4 = Ertrag).",
         "erhoehend"
       ),
       bk(
-        "Ein Kunde sendet Waren um <b>€ 350,00</b> netto + 20 % USt zurück. Wir hatten die Rechnung schon erhalten und bezahlt — wir <b>überweisen</b> dem Kunden den Betrag zurück. Buche die <b>Rückzahlung</b> (die Rücksendung selbst ist bereits gebucht).",
+        "<b>Verkäufer:</b> Sonstiger Beleg S440 — wir mahnen die Maria Mayer e.U. (2000) wegen einer offenen Ausgangsrechnung und belasten sie mit <b>€ 35,00 Mahnspesen</b>.",
         [
-          L("Soll",  "2000", 420),
-          L("Haben", "2800", 420)
+          L("Soll",  "2000", 35),
+          L("Haben", "4890", 35)
         ],
-        "Die Rücksendung wurde bereits über 4400/3500 an 2000 gebucht (Forderung ist negativ = Schuld an Kunden). Die Rückzahlung gleicht diese aus: 2000 Lieferforderungen an 2800 Bank.",
-        "neutral"
-      ),
-bk(
-        "Wir bekommen Handelswaren um <b>€ 800,00</b> netto + 20 % USt von unserem Kunden zurück. <i>Wähle die richtigen Konten und Beträge:</i>",
-        [
-          L("Soll",  "4400", 800),
-          L("Soll",  "3500", 160),
-          L("Haben", "2000", 960)
-        ],
-        "Erlösberichtigung 4400 + USt 3500 im Soll, Lieferforderung 2000 im Haben (Bruttobetrag).",
-        "vermindernd"
-      ),
-      bk(
-        "Wir senden Waren um <b>€ 1.500,00</b> netto + 20 % USt an unseren Lieferanten zurück.",
-        [
-          L("Soll",  "3300", 1800),
-          L("Haben", "5000", 1500),
-          L("Haben", "2500",  300)
-        ],
-        "Beim Käufer: 3300 Lieferverbindlichkeiten an 5000 Handelswareneinsatz + 2500 Vorsteuer.",
+        "Mahnspesen beim Verkäufer: 20… Kundenkonto / 4890 Mahnspesenvergütungen. Der Ertrag erhöht den Gewinn.",
         "erhoehend"
       ),
       bk(
-        "Ein Kunde meldet Mängel und sendet Waren um <b>€ 2.000,00</b> netto + 20 % USt zurück.",
-        [
-          L("Soll",  "4400", 2000),
-          L("Soll",  "3500",  400),
-          L("Haben", "2000", 2400)
-        ],
-        "Erlösberichtigung 4400 + USt 3500 im Soll. Bruttowert € 2.400 mindert die Forderung 2000.",
-        "vermindernd"
-      ),
-      bk(
-        "Wir senden Handelswaren um <b>€ 750,00</b> netto + 20 % USt zurück an den Lieferanten.",
-        [
-          L("Soll",  "3300", 900),
-          L("Haben", "5000", 750),
-          L("Haben", "2500", 150)
-        ],
-        "Beim Käufer: Lieferverbindlichkeit reduziert sich um Brutto, Wareneinsatz und Vorsteuer werden storniert.",
-        "erhoehend"
-      ),
-      bk(
-        "Ein Kunde reklamiert Waren um <b>€ 480,00</b> netto + 20 % USt und sendet sie zurück. Die Rechnung wurde bereits per Bank bezahlt. Buche die <b>Bank-Rückzahlung</b> (die Rücksendung selbst wurde schon gebucht).",
-        [
-          L("Soll",  "2000", 576),
-          L("Haben", "2800", 576)
-        ],
-        "Nach der Rücksendung-Buchung haben wir eine 'Schuld' (negative Forderung) gegenüber dem Kunden. Die Rückzahlung gleicht diese aus.",
-        "neutral"
-      )
-    ]
-  },
-
-  /* ---------- 2. Rechnungsausgleich, Mahnspesen, Verzugszinsen ---------- */
-  mahnspesen: {
-    fill: [],
-    drop: [
-      bk(
-        "Ein Kunde zahlt verspätet. Wir verrechnen ihm <b>€ 15,00 Mahnspesen</b> und <b>€ 12,00 Verzugszinsen</b>. Buche die <b>Belastung beim Verkäufer</b> (Erhöhung der Forderung).",
-        [
-          L("Soll",  "2000", 27),
-          L("Haben", "4890", 15),
-          L("Haben", "8055", 12)
-        ],
-        "Beim Verkäufer sind das <b>Erträge</b>: Mahnspesen → 4890 Mahnspesenvergütungen, Verzugszinsen → 8055 Verzugszinsenerträge. Die Forderung 2000 erhöht sich um den Gesamtbetrag. Mahnspesen sind <b>nicht umsatzsteuerpflichtig</b>.",
-        "erhoehend"
-      ),
-      bk(
-        "Wir bezahlen unserem Lieferanten verspätet und müssen <b>€ 20,00 Mahnspesen</b> sowie <b>€ 35,00 Verzugszinsen</b> zahlen. Buche die <b>Verbindlichkeitserhöhung beim Käufer</b>.",
-        [
-          L("Soll",  "8321", 20),
-          L("Soll",  "8320", 35),
-          L("Haben", "3300", 55)
-        ],
-        "Beim Käufer sind das <b>Aufwendungen</b>: 8321 Mahnspesen, 8320 Verzugszinsenaufwand. Die Lieferverbindlichkeit erhöht sich entsprechend.",
-        "vermindernd"
-      ),
-      bk(
-        "Ein Kunde überweist eine Rechnung über <b>€ 1.200,00</b> (brutto) inklusive berechneter Mahnspesen € 10,- und Verzugszinsen € 8,-. Buche den <b>Bankeingang</b>.",
-        [
-          L("Soll",  "2800", 1200),
-          L("Haben", "2000", 1200)
-        ],
-        "Der Zahlungseingang berührt nur Bank und Lieferforderung — die Mahnspesen/Verzugszinsen wurden ja bereits beim Verrechnen gebucht.",
-        "neutral"
-      ),
-      bk(
-        "Wir bezahlen eine Eingangsrechnung in Höhe von <b>€ 3.600,00</b> brutto durch Banküberweisung unter Abzug von <b>3 % Skonto</b>.",
-        [
-          L("Soll",  "3300", 3600),
-          L("Haben", "2800", 3492),
-          L("Haben", "5880",  90),
-          L("Haben", "2500",  18)
-        ],
-        "3 % von 3.600 = 108 brutto Skonto. Davon 18 Vorsteuerkorrektur (108/6) und 90 Lieferantenskonti netto. Bank zahlt 3.492.",
-        "erhoehend"
-      ),
-      bk(
-        "Ein säumiger Kunde überweist die ausstehende Rechnung. Wir verrechnen ihm vorher <b>€ 25,00 Mahnspesen</b> und <b>€ 18,00 Verzugszinsen</b>. Buche die <b>Verrechnung beim Verkäufer</b>.",
-        [
-          L("Soll",  "2000", 43),
-          L("Haben", "4890", 25),
-          L("Haben", "8055", 18)
-        ],
-        "Beim Verkäufer Erträge: 4890 Mahnspesenvergütungen, 8055 Verzugszinsenerträge — Forderung steigt. Mahnspesen und Verzugszinsen sind <b>USt-frei</b>.",
-        "erhoehend"
-      ),
-bk(
-        "Wir verrechnen einem säumigen Kunden <b>€ 18,00 Mahnspesen</b> und <b>€ 22,00 Verzugszinsen</b>.",
-        [
-          L("Soll",  "2000", 40),
-          L("Haben", "4890", 18),
-          L("Haben", "8055", 22)
-        ],
-        "Beim Verkäufer Ertragskonten 4890 + 8055; Forderung 2000 erhöht sich.",
-        "erhoehend"
-      ),
-      bk(
-        "Unser Lieferant stellt uns wegen Zahlungsverzug <b>€ 25,00 Mahnspesen</b> und <b>€ 40,00 Verzugszinsen</b> in Rechnung.",
-        [
-          L("Soll",  "8321", 25),
-          L("Soll",  "8320", 40),
-          L("Haben", "3300", 65)
-        ],
-        "Beim Käufer Aufwandskonten 8321 + 8320; Lieferverbindlichkeit 3300 erhöht sich.",
-        "vermindernd"
-      ),
-      bk(
-        "Wir bezahlen die Eingangsrechnung in Höhe von <b>€ 2.460,00</b> brutto durch Banküberweisung unter Abzug von <b>2 % Skonto</b>.",
-        [
-          L("Soll",  "3300", 2460),
-          L("Haben", "2800", 2410.80),
-          L("Haben", "5880",  41),
-          L("Haben", "2500",   8.20)
-        ],
-        "2 % von 2.460 = 49,20 brutto Skonto. Davon 8,20 Vorsteuerkorrektur (49,20/6) und 41,00 Lieferantenskonti.",
-        "erhoehend"
-      ),
-      bk(
-        "Ein Kunde bezahlt seine Rechnung von <b>€ 1.800,00</b> brutto per Bank unter Abzug von <b>2 % Skonto</b>.",
-        [
-          L("Soll",  "2800", 1764),
-          L("Soll",  "4410",   30),
-          L("Soll",  "3500",    6),
-          L("Haben", "2000", 1800)
-        ],
-        "2 % von 1.800 = 36 brutto Skonto. Davon 6 Umsatzsteuerkorrektur (36/6) und 30 Kundenskonti netto. Bank erhält 1.764. Beim Verkäufer mindern Kundenskonti den Erlös → 4410.",
-        "vermindernd"
-      ),
-      bk(
-        "Wir verrechnen einem Kunden <b>€ 12,00 Mahnspesen</b> und <b>€ 9,50 Verzugszinsen</b> wegen Zahlungsverzug.",
-        [
-          L("Soll",  "2000", 21.50),
-          L("Haben", "4890", 12),
-          L("Haben", "8055",  9.50)
-        ],
-        "Beim Verkäufer Erträge auf 4890 + 8055; Forderung 2000 erhöht sich um die Summe.",
-        "erhoehend"
-      ),
-      bk(
-        "Wir bezahlen unsere alte Eingangsrechnung in Höhe von <b>€ 540,00</b> brutto per Bank. Vorher hatten wir bereits <b>€ 10,00 Mahnspesen</b> und <b>€ 15,00 Verzugszinsen</b> verrechnet bekommen — die offene Schuld auf 3300 beträgt jetzt <b>€ 565,00</b>. Buche den <b>Bankausgleich</b>.",
+        "<b>Käufer:</b> Bankausgang B142 <b>€ 565,00</b> — Ausgleich der Eingangsrechnung E878 (€ 540,00) inkl. <b>€ 15,00 Verzugszinsen + € 10,00 Mahnspesen</b> (alle drei bereits gebucht). Die Verbindlichkeit beträgt nun € 565,00.",
         [
           L("Soll",  "3300", 565),
           L("Haben", "2800", 565)
         ],
-        "Reine Tilgungs-Buchung über die Gesamtsumme: <b>3300 Lieferverbindlichkeiten</b> an <b>2800 Bank</b>. Mahnspesen und Verzugszinsen wurden bereits zuvor als Aufwand gebucht und haben die Schuld erhöht (Buch Ü 1.18, S. 39, B142).",
+        "Reine Bilanzbuchung: Verbindlichkeit gegen Bank. Der Aufwand wurde bereits bei der Mahn-/Verzugsbuchung gebucht — der Bankausgang ist erfolgsneutral.",
+        "neutral"
+      ),
+      bk(
+        "<b>Verkäufer:</b> Bankeingang B143 <b>€ 1.440,00</b> — der Kunde Jürgen Rabenberger e.U. (2000) hat die A1245 über € 1.420,00 inkl. der vorigen € 20,00 Verzugszinsen überwiesen.",
+        [
+          L("Soll",  "2800", 1440),
+          L("Haben", "2000", 1440)
+        ],
+        "Reine Bilanzbuchung Bank gegen Kundenforderung. Der Ertrag wurde bei der Verzugszinsen-Buchung erfasst.",
         "neutral"
       )
     ]
   },
 
-  /* ---------- 3. Kauf Anlagengüter inkl. GWG ---------- */
-  anlagen: {
+  /* ============================================================
+     KAPITEL 2 — KREDIT-/DEBITKARTE BEIM KÄUFER  (Buch S. 39–42)
+     ============================================================ */
+  karte_kauf: {
     fill: [],
     drop: [
       bk(
-        "Wir kaufen eine <b>neue Maschine</b> auf Ziel um <b>€ 12.000,00</b> netto + 20 % USt.",
+        "<b>Diesel für Lkw mit Kreditkarte:</b> Tankstellenbeleg über <b>€ 70,83 + € 14,17 USt = € 85,00</b>, Zahlung mit Firmen-VISA. Hinweis: Konto 7330 Lkw-Betriebsaufwand.",
         [
-          L("Soll",  "0400", 12000),
-          L("Soll",  "2500",  2400),
-          L("Haben", "3300", 14400)
+          L("Soll",  "7330", 70.83),
+          L("Soll",  "2500", 14.17),
+          L("Haben", "3180", 85)
         ],
-        "Maschine > € 1.000 netto → echtes Anlagengut. Buchung: 0400 Maschinen + 2500 Vorsteuer an 3300 Lieferverbindlichkeiten.",
+        "Kreditkartenzahlung erzeugt Verbindlichkeit: 3180 Verbindlichkeiten Kreditkartenunternehmen. Vorsteuer wird normal abgezogen.",
+        "vermindernd"
+      ),
+      bk(
+        "<b>Werbeaufwand mit Debitkarte:</b> Kauf eines Sessels für das Schaufenster <b>€ 252,00 + € 50,40 USt = € 302,40</b> (Werbeaufwand). Zahlung mit Firmendebitkarte.",
+        [
+          L("Soll",  "7650", 252),
+          L("Soll",  "2500", 50.40),
+          L("Haben", "3190", 302.40)
+        ],
+        "Debitkartenzahlung erzeugt Verbindlichkeit: 3190 Verbindlichkeiten Debitkarten. Werbeaufwand 7650 ist Klasse 7 → vermindernd.",
+        "vermindernd"
+      ),
+      bk(
+        "<b>Bankabbuchung Debitkarte:</b> Bankbeleg B223 — Belastung <b>€ 302,40</b> für die Debitkartenzahlung des Sessels (vorige Karte).",
+        [
+          L("Soll",  "3190", 302.40),
+          L("Haben", "2800", 302.40)
+        ],
+        "Debitkarte = Echtzeit-Lastschrift: Verbindlichkeit Debitkarten gegen Bank. Reine Bilanzbuchung.",
         "neutral"
       ),
       bk(
-        "Wir kaufen einen <b>Bürodrucker um € 600,00</b> netto + 20 % USt auf Ziel. Buche den Kauf als <b>GWG (sofort abschreiben)</b>.",
+        "<b>Geschäftsausstattung mit Kreditkarte:</b> Kauf eines Vorhangstoffes fürs Geschäftslokal <b>€ 800,00 + € 160,00 USt = € 960,00</b>, Zahlung mit Firmen-VISA. Konto: 0600 Betriebs- und Geschäftsausstattung.",
         [
-          L("Soll",  "7060", 600),
-          L("Soll",  "2500", 120),
-          L("Haben", "3300", 720)
+          L("Soll",  "0600", 800),
+          L("Soll",  "2500", 160),
+          L("Haben", "3180", 960)
         ],
-        "Laut UNCO-Buch S. 9 Methode 1 wird das GWG <b>sofort beim Kauf</b> auf <b>7060 Abschreibungen geringwertiger Wirtschaftsgüter</b> abgeschrieben — kein Umweg über ein Klasse-0-Konto.",
-        "vermindernd"
-      ),
-      bk(
-        "Wir kaufen einen <b>Computer um € 1.500,00</b> netto + 20 % USt auf Ziel.",
-        [
-          L("Soll",  "0620", 1500),
-          L("Soll",  "2500",  300),
-          L("Haben", "3300", 1800)
-        ],
-        "Computer > € 1.000 netto = echtes Anlagengut. Buchung: <b>0620 Büromaschinen, EDV-Anlagen</b> + <b>2500 Vorsteuer</b> an <b>3300 Lieferverbindlichkeiten</b>.",
+        "Anlagengüter werden aktiviert (Bilanzkonto 0600). Mit Kreditkarte: 3180 Kredikarten-Verbindlichkeit. Alles Bilanzkonten → erfolgsneutral.",
         "neutral"
       ),
       bk(
-        "Wir kaufen einen <b>Werkzeugsatz um € 850,00</b> netto + 20 % USt auf Ziel (GWG, sofort abschreiben).",
+        "<b>Geschäftsausstattung mit Debitkarte:</b> Kauf eines Deckenventilators vom XXXLutz KG <b>€ 1.143,00 + € 228,60 USt = € 1.371,60</b>, Zahlung mit Firmendebitkarte. (Anlage > € 1.000 → keine GWG, normal aktivieren.)",
         [
-          L("Soll",  "7060", 850),
-          L("Soll",  "2500", 170),
-          L("Haben", "3300", 1020)
+          L("Soll",  "0600", 1143),
+          L("Soll",  "2500", 228.60),
+          L("Haben", "3190", 1371.60)
         ],
-        "GWG ≤ € 1.000 netto → laut Buch S. 9 sofort auf <b>7060 Abschreibungen GWG</b>. Vorsteuer auf den Nettowert.",
-        "vermindernd"
-      ),
-      bk(
-        "Wir kaufen <b>Büromaterial um € 120,00</b> netto + 20 % USt bar (kein Anlagengut!).",
-        [
-          L("Soll",  "7600", 120),
-          L("Soll",  "2500",  24),
-          L("Haben", "2700", 144)
-        ],
-        "Achtung — Verbrauchsmaterial ist <b>kein</b> Anlagengut, auch nicht GWG. Direkt auf Aufwandskonto <b>7600 Büromaterial</b>.",
-        "vermindernd"
-      ),
-bk(
-        "Wir kaufen einen <b>Lkw um € 35.000,00</b> netto + 20 % USt auf Ziel.",
-        [
-          L("Soll",  "0640", 35000),
-          L("Soll",  "2500",  7000),
-          L("Haben", "3300", 42000)
-        ],
-        "Lkw ist ein <b>echtes Anlagengut</b> mit voller Vorsteuerabzugsberechtigung: <b>0640 Lkw</b> + <b>2500 Vorsteuer</b> an <b>3300 Lieferverbindlichkeiten</b>. (Bei Pkw/Kombi gäbe es keinen Vorsteuerabzug — daher hier bewusst der Lkw.)",
+        "0600 Betriebs- und Geschäftsausstattung wegen > € 1.000 net. 3190 statt 3180, weil Debitkarte.",
         "neutral"
       ),
       bk(
-        "Wir kaufen <b>5 Bürostühle um je € 180,00</b> netto + 20 % USt (Summe netto € 900,-) auf Ziel — als GWG (sofort abschreiben).",
+        "<b>Monatsabrechnung Kreditkarte:</b> Bankbeleg B225 — VISA-Monatsrechnung, Abbuchung <b>€ 1.548,00</b> für die Kreditkartenumsätze des Monats.",
         [
-          L("Soll",  "7060", 900),
-          L("Soll",  "2500", 180),
-          L("Haben", "3300", 1080)
+          L("Soll",  "3180", 1548),
+          L("Haben", "2800", 1548)
         ],
-        "GWG ≤ € 1.000 netto → laut Buch S. 9 sofort auf <b>7060 Abschreibungen GWG</b>, kein Umweg über 0670.",
-        "vermindernd"
-      ),
-      bk(
-        "Wir kaufen einen <b>Pkw um € 30.000,00</b> netto + 20 % USt auf Ziel.",
-        [
-          L("Soll",  "0630", 36000),
-          L("Haben", "3300", 36000)
-        ],
-        "<b>Achtung — Pkw:</b> Bei Pkw und Kombi gibt es <b>keinen Vorsteuerabzug</b> (Buch S. 7). Der gesamte <b>Bruttobetrag (€ 36.000)</b> wird auf <b>0630 Pkw und Kombis</b> aktiviert. Kein 2500 Vorsteuer in der Buchung!",
-        "neutral"
-      ),
-      bk(
-        "Wir kaufen ein neues <b>Datenverarbeitungsprogramm um € 480,00</b> netto + 20 % USt auf Ziel (GWG, sofort abschreiben).",
-        [
-          L("Soll",  "7060", 480),
-          L("Soll",  "2500",  96),
-          L("Haben", "3300", 576)
-        ],
-        "Software-GWG ≤ € 1.000 → laut Buch S. 9 sofort auf <b>7060 Abschreibungen GWG</b>.",
-        "vermindernd"
-      ),
-      bk(
-        "Wir kaufen <b>3 Akkubohrer für je € 320,00</b> netto + 20 % USt (Summe netto € 960,-) auf Ziel — als GWG (sofort abschreiben).",
-        [
-          L("Soll",  "7060", 960),
-          L("Soll",  "2500", 192),
-          L("Haben", "3300", 1152)
-        ],
-        "Mehrere selbstständig nutzbare Geräte unter je € 1.000 = jedes als GWG. Sofort auf <b>7060 Abschreibungen GWG</b> (Buch S. 9).",
-        "vermindernd"
-      ),
-      bk(
-        "Wir kaufen ein <b>Elektrofahrzeug (E-Pkw, 0 g CO₂) um € 35.000,00</b> netto + 20 % USt auf Ziel.",
-        [
-          L("Soll",  "0630", 35000),
-          L("Soll",  "2500",  7000),
-          L("Haben", "3300", 42000)
-        ],
-        "<b>Sonderfall:</b> Elektro-Pkw und Elektro-Kombi (0 g CO₂) bis zu einem Anschaffungswert von <b>€ 40.000 (inkl. USt)</b> sind voll <b>vorsteuerabzugsberechtigt</b> (Buch S. 7). Konto bleibt <b>0630 Pkw und Kombis</b>, aber im Gegensatz zum normalen Pkw wird <b>2500 Vorsteuer</b> mitgebucht.",
+        "Kreditkarte ist KEIN sofortiger Lastschrift wie Debitkarte: monatlich werden alle Umsätze auf einmal vom Bankkonto abgebucht.",
         "neutral"
       )
     ]
   },
 
-  /* ---------- 4. Bezugs- und Versandkosten ---------- */
-  bezugskosten: {
+  /* ============================================================
+     KAPITEL 3 — KREDIT-/DEBITKARTE BEIM VERKÄUFER  (Buch S. 43–45)
+     ============================================================ */
+  karte_verk: {
     fill: [],
     drop: [
       bk(
-        "Wir kaufen Handelswaren um <b>€ 4.000,00</b> netto + 20 % USt auf Ziel. Der Lieferant verrechnet zusätzlich <b>€ 200,00</b> netto + 20 % USt <b>Frachtkosten (Bezugskosten)</b>.",
+        "<b>Verkauf gegen Kreditkartenzahlung:</b> Tagesabschluss S235 — Kreditkartenumsätze <b>€ 766,80</b> (€ 639,00 + € 127,80 USt). Abrechnung über die SIX Payment Services.",
         [
-          L("Soll",  "5000", 4000),
-          L("Soll",  "5000",  200),
-          L("Soll",  "2500",  840),
-          L("Haben", "3300", 5040)
+          L("Soll",  "2880", 766.80),
+          L("Haben", "4000", 639),
+          L("Haben", "3500", 127.80)
         ],
-        "Laut Buch S. 15: <b>Bezugskosten werden auf demselben Konto verbucht wie der Wareneinkauf — also 5000 HW-Einsatz</b>. Vorsteuer auf den Gesamtbetrag (4.000 + 200 = 4.200) → 840.",
-        "vermindernd"
+        "Beim Verkauf mit Kreditkarte entsteht Forderung an das Kreditkartenunternehmen: 2880. Erlös und USt wie üblich.",
+        "erhoehend"
       ),
       bk(
-        "Wir verkaufen Handelswaren um <b>€ 3.000,00</b> netto + 20 % USt. Der Versand mit DHL kostet uns <b>€ 80,00</b> netto + 20 % USt; wir zahlen bar.",
+        "<b>Verkauf gegen Debitkartenzahlung:</b> Tagesabschluss S236 — Debitkartenumsätze <b>€ 399,60</b> (€ 333,00 + € 66,60 USt).",
         [
-          L("Soll",  "7310", 80),
-          L("Soll",  "2500", 16),
-          L("Haben", "2700", 96)
+          L("Soll",  "2885", 399.60),
+          L("Haben", "4000", 333),
+          L("Haben", "3500", 66.60)
         ],
-        "Versandkosten beim <b>Verkauf</b> sind <b>7310 Paketgebühren 20 %</b> (Aufwand) — Buch S. 19 zeigt für Spedition 7300 bzw. für Paketdienste mit USt 7310. Bar bezahlt → 2700 Kassa.",
-        "vermindernd"
+        "Beim Verkauf mit Debitkarte entsteht Forderung an das Clearing-Institut: 2885 Forderungen Debitkarten.",
+        "erhoehend"
       ),
       bk(
-        "Wir senden eine Rechnung per Post an einen Kunden. <b>Portokosten € 4,90</b> bar.",
+        "<b>Bankeingang Debitkarte:</b> Kontoauszug B69 — Gutschrift <b>€ 399,60</b> auf dem Bankkonto für die vorigen Debitkartenumsätze (Eingang sofort, ohne Provisionsabzug — die Provision wird einmal monatlich gesammelt abgebucht).",
         [
-          L("Soll",  "7385", 4.90),
-          L("Haben", "2700", 4.90)
+          L("Soll",  "2800", 399.60),
+          L("Haben", "2885", 399.60)
         ],
-        "Briefporto Post = <b>7385 Portogebühren</b> (umsatzsteuerbefreit, daher kein Vorsteuerabzug).",
-        "vermindernd"
-      ),
-      bk(
-        "Wir kaufen eine <b>Maschine um € 15.000,00</b> netto + 20 % USt auf Ziel und zahlen zusätzlich <b>€ 500,00</b> Transportkosten netto + 20 % USt (auch auf Ziel).",
-        [
-          L("Soll",  "0400", 15500),
-          L("Soll",  "2500",  3100),
-          L("Haben", "3300", 18600)
-        ],
-        "Bei Anlagengütern werden Bezugskosten <b>aktiviert</b> = in den Anschaffungswert eingerechnet (15.000 + 500 = 15.500), <b>nicht</b> auf 5600 gebucht.",
+        "Bei Debitkarten kommt das Geld brutto rein, und Provisionen werden separat einmal pro Monat abgebucht. → Reine Bilanzbuchung.",
         "neutral"
       ),
       bk(
-        "Eine Spedition liefert uns Handelswaren und stellt uns <b>€ 250,00</b> netto + 20 % USt <b>Bezugsfracht</b> in Rechnung. Bezahlung mit Bank.",
+        "<b>Bankeingang Kreditkarte mit Provisionsabzug:</b> SIX Payment überweist die Kreditkartenumsätze <b>€ 766,80</b> abzüglich <b>€ 19,10 Disagio + € 1,60 Buchungsentgelt = € 20,70 Provision + € 4,14 USt</b>. Überweisungsbetrag <b>€ 741,96</b>.",
         [
-          L("Soll",  "5000", 250),
-          L("Soll",  "2500",  50),
-          L("Haben", "2800", 300)
+          L("Soll",  "2800", 741.96),
+          L("Soll",  "7792", 20.70),
+          L("Soll",  "2500", 4.14),
+          L("Haben", "2880", 766.80)
         ],
-        "Laut Buch S. 15 + Beispiel S. 16/17: Bezugskosten beim Wareneinkauf werden auf <b>5000 HW-Einsatz</b> verbucht — auch wenn es eine separate Speditionsrechnung ist.",
+        "Kreditkartenabrechnung: Bank + Provision (7792) + Vorsteuer im Soll, Forderung 2880 wird ausgeglichen. Provision ist Aufwand → Klasse 7 im Soll = vermindernd.",
         "vermindernd"
       ),
-bk(
-        "Wir kaufen Handelswaren um <b>€ 2.500,00</b> netto + 20 % USt; der Lieferant verrechnet zusätzlich <b>€ 100,00</b> netto + 20 % USt für den Transport. Zahlung auf Ziel.",
+      bk(
+        "<b>Provisionsabbuchung Debitkarte (monatlich):</b> Bankabbuchung B76 der SIX Payment für Debitkarten-Provisionen März <b>€ 70,43 + € 14,09 USt = € 84,52</b>.",
         [
-          L("Soll",  "5000", 2500),
-          L("Soll",  "5000",  100),
-          L("Soll",  "2500",  520),
+          L("Soll",  "7792", 70.43),
+          L("Soll",  "2500", 14.09),
+          L("Haben", "2800", 84.52)
+        ],
+        "Bei Debitkarten werden Provisionen einmal pro Monat pauschal abgebucht — separater Buchungssatz an die Bank, ohne Forderungskonto.",
+        "vermindernd"
+      ),
+      bk(
+        "<b>Card Complete-Abrechnung:</b> Gesamtumsatz <b>€ 8.320,00</b> abzüglich 2,5 % Provision € 208,00 + Buchungsentgelt € 3,90 = € 211,90 + 20 % USt € 42,38 = Gesamtabzug € 254,28. Überweisungsbetrag <b>€ 8.065,72</b>.",
+        [
+          L("Soll",  "2800", 8065.72),
+          L("Soll",  "7792", 211.90),
+          L("Soll",  "2500", 42.38),
+          L("Haben", "2880", 8320)
+        ],
+        "Das Kreditkartenunternehmen behält Disagio + Buchungsentgelt + USt sofort ein. Forderung 2880 wird voll ausgeglichen.",
+        "vermindernd"
+      )
+    ]
+  },
+
+  /* ============================================================
+     KAPITEL 4 — LIEFERANTENSKONTO  (Buch S. 45–49)
+     ============================================================ */
+  lief_skonto: {
+    fill: [],
+    drop: [
+      bk(
+        "<b>Eingangsrechnung E7</b> der Saisan Teppichhaus GmbH (3300): Einkauf von Orientteppichen <b>€ 7.000,00 + € 1.400,00 USt = € 8.400,00</b>. Zahlungskonditionen: 60 Tage Ziel oder 10 Tage abzgl. 3 % Skonto.",
+        [
+          L("Soll",  "5000", 7000),
+          L("Soll",  "2500", 1400),
+          L("Haben", "3300", 8400)
+        ],
+        "Standard-Wareneinkauf auf Ziel. Skonto wird erst bei der Bezahlung gebucht.",
+        "vermindernd"
+      ),
+      bk(
+        "<b>Bankausgang B6</b> — wir überweisen an Saisan Teppichhaus GmbH (3300) <b>€ 8.148,00</b>: € 8.400,00 abzgl. 3 % Skonto € 252,00. Hier nur den reinen Bankausgang buchen — der Skonto kommt im nächsten Schritt.",
+        [
+          L("Soll",  "3300", 8148),
+          L("Haben", "2800", 8148)
+        ],
+        "Erst der Zahlungsausgang gegen Bank. Wichtig: damit ist die Verbindlichkeit noch NICHT voll ausgeglichen — dafür braucht es noch die Skonto-Buchung.",
+        "neutral"
+      ),
+      bk(
+        "<b>Skonto-Buchung (Lieferant):</b> Den Brutto-Skonto € 252,00 = <b>€ 210,00 Skonto + € 42,00 Vorsteuer-Korrektur</b> auf die Saisan Teppichhaus GmbH (3300) buchen. (Berechnung VSt: 252 / 6 = 42)",
+        [
+          L("Soll",  "3300", 252),
+          L("Haben", "5880", 210),
+          L("Haben", "2500", 42)
+        ],
+        "5880 Lieferantenskonti im Haben = Aufwand wird vermindert → erfolgserhöhend. Vorsteuer im Haben korrigiert die zu viel gebuchte VSt vom Einkauf.",
+        "erhoehend"
+      ),
+      bk(
+        "<b>Eingangsrechnung E421</b> Klaus Huber e.U. (3300): Mikrowellenherde <b>€ 3.120,00 inkl. 20 % USt</b> (also € 2.600,00 netto + € 520,00 USt).",
+        [
+          L("Soll",  "5000", 2600),
+          L("Soll",  "2500", 520),
           L("Haben", "3300", 3120)
         ],
-        "Bezugskosten + Wareneinkauf gehen <b>beide auf 5000</b> (Buch S. 15).",
+        "Brutto € 3.120 / 1,20 = € 2.600 netto, USt = € 520. Buchung als Wareneinkauf auf Ziel.",
         "vermindernd"
       ),
       bk(
-        "Ein Paketdienst (DHL) verrechnet uns für den Versand an Kunden <b>€ 60,00</b> netto + 20 % USt. Bezahlung mit Bank.",
+        "<b>Bankausgang B117</b> an Walter Schwarz OG (3300): € 2.592,00 abzüglich 3 % Skonto € 77,76 = überwiesen <b>€ 2.514,24</b>. Hier nur den Zahlungsausgang gegen Bank buchen.",
         [
-          L("Soll",  "7310", 60),
-          L("Soll",  "2500", 12),
-          L("Haben", "2800", 72)
+          L("Soll",  "3300", 2514.24),
+          L("Haben", "2800", 2514.24)
         ],
-        "Versand an Kunden = Aufwand. <b>7310 Paketgebühren 20 %</b> + Vorsteuer; Bezahlung über 2800 Bank.",
-        "vermindernd"
-      ),
-      bk(
-        "Wir kaufen ein Anlagegut (Maschine) um <b>€ 8.000,00</b> netto + 20 % USt auf Ziel und zahlen zusätzlich <b>€ 300,00</b> Transportkosten netto + 20 % USt (auch auf Ziel).",
-        [
-          L("Soll",  "0400", 8300),
-          L("Soll",  "2500", 1660),
-          L("Haben", "3300", 9960)
-        ],
-        "Bezugskosten beim Kauf eines <b>Anlageguts</b> werden in die <b>Anschaffungskosten</b> eingerechnet (aktiviert) und nicht auf 5600 gebucht. → 0400 Maschinen 8.300.",
+        "Brutto-Skonto: 2592 × 0,03 = 77,76. Überweisungsbetrag = 2592 − 77,76 = 2.514,24.",
         "neutral"
       ),
       bk(
-        "Wir versenden Waren mit dem Paketdienst und zahlen dafür <b>€ 25,00</b> netto + 20 % USt bar.",
+        "<b>Skonto-Buchung (Lieferant):</b> Brutto-Skonto € 77,76 zu Walter Schwarz OG (3300) aufteilen: <b>€ 64,80 Skonto + € 12,96 Vorsteuer-Korrektur</b>. (Berechnung: 77,76 / 6 = 12,96)",
         [
-          L("Soll",  "7310", 25),
-          L("Soll",  "2500",  5),
-          L("Haben", "2700", 30)
+          L("Soll",  "3300", 77.76),
+          L("Haben", "5880", 64.80),
+          L("Haben", "2500", 12.96)
         ],
-        "Versand an Kunden = Aufwand auf <b>7310 Paketgebühren 20 %</b>.",
+        "Brutto-Skonto / 1,20 = Netto-Skonto. Differenz ist die VSt-Korrektur.",
+        "erhoehend"
+      )
+    ]
+  },
+
+  /* ============================================================
+     KAPITEL 5 — KUNDENSKONTO  (Buch S. 50–53)
+     ============================================================ */
+  kund_skonto: {
+    fill: [],
+    drop: [
+      bk(
+        "<b>Ausgangsrechnung A2437</b> an Schulz KG (2000): Verkauf von Textilien <b>€ 3.900,00 + € 780,00 USt = € 4.680,00</b>. Konditionen: 8 Tage abzgl. 2 % Skonto oder 60 Tage netto.",
+        [
+          L("Soll",  "2000", 4680),
+          L("Haben", "4000", 3900),
+          L("Haben", "3500", 780)
+        ],
+        "Standard-Warenverkauf auf Ziel. Skontomöglichkeit ändert vorerst nichts an der Buchung — der Skonto kommt erst bei Zahlung.",
+        "erhoehend"
+      ),
+      bk(
+        "<b>Bankeingang B214</b> — Schulz KG (2000) hat innerhalb der Kassafrist <b>€ 4.586,40</b> überwiesen (€ 4.680,00 abzgl. 2 % Skonto € 93,60).",
+        [
+          L("Soll",  "2800", 4586.40),
+          L("Haben", "2000", 4586.40)
+        ],
+        "Erst der Zahlungseingang Bank gegen Kundenforderung. Mit dieser einen Buchung ist die Forderung noch NICHT voll ausgeglichen — Skonto-Buchung kommt extra.",
+        "neutral"
+      ),
+      bk(
+        "<b>Skonto-Buchung (Kunde):</b> Brutto-Skonto € 93,60 von Schulz KG (2000): <b>€ 78,00 Erlösminderung + € 15,60 USt-Korrektur</b>. (Berechnung: 93,60 / 6 = 15,60)",
+        [
+          L("Soll",  "4410", 78),
+          L("Soll",  "3500", 15.60),
+          L("Haben", "2000", 93.60)
+        ],
+        "4410 Kundenskonti 20% im Soll = Erlösminderung → vermindernd. USt im Soll storniert die zu viel gebuchte USt vom Verkauf.",
         "vermindernd"
       ),
       bk(
-        "Briefporto für die Post: <b>€ 12,00</b>, bar bezahlt (USt-frei).",
+        "<b>Ausgangsrechnung A828</b> an Norbert Miklos e.U. (2000): Warenverkauf <b>€ 2.000,00 + € 400,00 USt = € 2.400,00</b> auf Ziel.",
         [
-          L("Soll",  "7385", 12),
-          L("Haben", "2700", 12)
+          L("Soll",  "2000", 2400),
+          L("Haben", "4000", 2000),
+          L("Haben", "3500", 400)
         ],
-        "Briefporto bei der Post ist <b>USt-frei</b>, daher kein Vorsteuerabzug. Konto: 7385 Portogebühren.",
+        "Standard-Warenverkauf auf Ziel.",
+        "erhoehend"
+      ),
+      bk(
+        "<b>Bankeingang B46</b> — Norbert Miklos e.U. (2000) hat überwiesen <b>€ 2.328,00</b> (€ 2.400,00 abzüglich 3 % Skonto € 72,00).",
+        [
+          L("Soll",  "2800", 2328),
+          L("Haben", "2000", 2328)
+        ],
+        "Brutto-Skonto: 2400 × 0,03 = 72. Überwiesener Betrag = 2.328,00.",
+        "neutral"
+      ),
+      bk(
+        "<b>Skonto-Buchung (Kunde):</b> Brutto-Skonto € 72,00 zu Norbert Miklos e.U. (2000): <b>€ 60,00 Erlösminderung + € 12,00 USt-Korrektur</b>. (Berechnung: 72 / 6 = 12)",
+        [
+          L("Soll",  "4410", 60),
+          L("Soll",  "3500", 12),
+          L("Haben", "2000", 72)
+        ],
+        "Brutto-Skonto / 1,20 = Netto-Skonto. Differenz = USt-Korrektur.",
         "vermindernd"
       )
     ]
-  }
+  },
+
+  /* ============================================================
+     KAPITEL 6 — SOFORTIGER SKONTOABZUG  (Buch S. 53–54)
+     ============================================================ */
+  sofort_skonto: {
+    fill: [],
+    drop: [
+      bk(
+        "<b>Verkauf mit Sofortskonto und Kreditkarte</b> S586 — Verkauf einer Gartensitzgarnitur „Aurora“ an Wolfgang Jonke e.U.: € 1.400,00 − € 42,00 Skonto = <b>€ 1.358,00 + € 271,60 USt = € 1.629,60</b>, Zahlung mit Kreditkarte. Es wird NUR der reduzierte Betrag verbucht.",
+        [
+          L("Soll",  "2880", 1629.60),
+          L("Haben", "4000", 1358),
+          L("Haben", "3500", 271.60)
+        ],
+        "Sofortskonto = der Skonto wird sofort vom Kaufpreis abgezogen, USt vom reduzierten Betrag berechnet. Keine separate Skonto-Buchung nötig.",
+        "erhoehend"
+      ),
+      bk(
+        "<b>Einkauf mit Sofortskonto bar</b> K929 — Wandteppich vom Lieferanten Taher Asimi: € 400,00 − € 8,00 Skonto = <b>€ 392,00 + € 78,40 USt = € 470,40</b>, Barzahlung.",
+        [
+          L("Soll",  "5000", 392),
+          L("Soll",  "2500", 78.40),
+          L("Haben", "2700", 470.40)
+        ],
+        "Sofortskonto beim Einkauf: Wareneinsatz nur mit dem reduzierten Netto, VSt vom reduzierten Netto, Kassa zahlt das reduzierte Brutto.",
+        "vermindernd"
+      ),
+      bk(
+        "<b>Einkauf mit Rabatt + Sofortskonto bar</b> K19 — zehn Schraubenschlüssel-Sets bei Ben Hellinger KG:<br>€ 475,00 − 30 % Rabatt € 142,50 = € 332,50<br>− 2 % Skonto € 6,65 = <b>€ 325,85 + 20 % USt € 65,17 = € 391,02</b>, Barzahlung.",
+        [
+          L("Soll",  "5000", 325.85),
+          L("Soll",  "2500", 65.17),
+          L("Haben", "2700", 391.02)
+        ],
+        "Reihenfolge: zuerst Rabatt vom Listenpreis, dann Sofortskonto, dann USt vom resultierenden Netto. Nur der Endbetrag wird gebucht.",
+        "vermindernd"
+      ),
+      bk(
+        "<b>Verkauf mit Debitkarte und Sofortskonto</b> S147 — Hochdruckreiniger an Hans Finger: € 216,00 − € 4,32 Skonto = <b>€ 211,68 + 20 % USt € 42,34 = € 254,02</b>, Debitkartenzahlung.",
+        [
+          L("Soll",  "2885", 254.02),
+          L("Haben", "4000", 211.68),
+          L("Haben", "3500", 42.34)
+        ],
+        "Debitkarte → Forderung 2885. Es wird nur das reduzierte Brutto/Netto gebucht.",
+        "erhoehend"
+      ),
+      bk(
+        "<b>Einkauf mit Debitkarte und Sofortskonto</b> S129 — Sanitäranlagen bei Österr. Sanitär KG: € 3.800,00 − € 114,00 Skonto = <b>€ 3.686,00 + € 737,20 USt = € 4.423,20</b>, Debitkartenzahlung.",
+        [
+          L("Soll",  "5000", 3686),
+          L("Soll",  "2500", 737.20),
+          L("Haben", "3190", 4423.20)
+        ],
+        "Wareneinkauf mit reduziertem Netto. Bezahlung mit Debitkarte → 3190 Verbindlichkeiten Debitkarten.",
+        "vermindernd"
+      ),
+      bk(
+        "<b>Barverkauf mit Sofortskonto</b> — Handelsware brutto € 600,00 − 2 % Skonto € 12,00 = <b>€ 588,00 inkl. 20 % USt</b> (€ 490,00 + € 98,00 USt). Barkasse.",
+        [
+          L("Soll",  "2700", 588),
+          L("Haben", "4000", 490),
+          L("Haben", "3500", 98)
+        ],
+        "Brutto-Endbetrag inkl. USt = € 588,00. Netto = 588 / 1,20 = 490. USt = 98.",
+        "erhoehend"
+      )
+    ]
+  },
+
+
 };
 
-/* ============================================================
+/* =
    APP-LOGIK
    ============================================================ */
 let state = {
   topic: TOPICS[0].id,
-  mode: "drop",            // nur noch Multiple Choice — fill-Modus deaktiviert
+  mode: "drop",            // nur noch Multiple Choice — fill-Modus deaktiviert (v2.2)
   cardIdx: 0,
   score: 0,
   total: 0,
@@ -919,7 +880,7 @@ function render(){
   area.innerHTML = `
     ${banner}
     <div class="card">
-      <h2>${TOPICS.find(t=>t.id===state.topic).label}${inReview?" · Wiederholung":""}</h2>
+      <h2>${TOPICS.find(t=>t.id===state.topic).label} — ${state.mode==="fill"?"Selbst ausfüllen":"Multiple Choice"}${inReview?" · Wiederholung":""}</h2>
       <div class="scenario">${card.scenario}</div>
       <div class="booking-grid">
         <div class="booking-side soll">
@@ -939,7 +900,10 @@ function render(){
           </div>
         </div>
       </div>
-      <p class="hint">Soll-Konten links, Haben-Konten rechts, Gewinnauswirkung ganz rechts auswählen. Beträge mit Komma oder Punkt — beides funktioniert.</p>
+      <p class="hint">${state.mode==="fill"
+        ? "Soll-Konten links, Haben-Konten rechts, Gewinnauswirkung rechts auswählen. Kontonummer (z.B. <b>5000</b>) und Betrag eintragen — Komma oder Punkt funktionieren beide."
+        : "Soll-Konten links, Haben-Konten rechts, Gewinnauswirkung rechts auswählen."
+      }</p>
       <div class="actions">
         <button class="btn btn-primary" id="btnCheck">✓ Prüfen</button>
         <button class="btn btn-secondary" id="btnSkip" title="Lösung anzeigen ohne zu prüfen">💡 Lösung anzeigen</button>
@@ -1123,7 +1087,7 @@ render();
 
 // Footer aus zentraler BUILD-Konstante füllen
 document.getElementById("footer").innerHTML =
-  `UNCO Karteikarten · 2. SBO 30.04.2026 · <code>${BUILD.version}</code> · Stand: ${BUILD.timestamp}`;
+  `UNCO Karteikarten · Buch S. 38–61 (Rechnungsausgleich) · <code>${BUILD.version}</code> · Stand: ${BUILD.timestamp}`;
 </script>
 </body>
 </html>
