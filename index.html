@@ -58,7 +58,7 @@
     margin:12px 0 18px;font-size:15px}
   .scenario b{color:var(--primary-dark)}
   .booking-grid{display:grid;grid-template-columns:1fr 1fr 150px;gap:14px;margin-top:8px}
-  .booking-side{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+  .booking-side{border:1px solid var(--line);border-radius:10px;overflow:visible;background:#fff}
   .booking-side h4{margin:0;padding:8px 12px;font-size:12px;letter-spacing:1px;text-transform:uppercase;
     text-align:center;font-weight:700;border-bottom:2px solid var(--line)}
   .booking-side.soll h4{background:#eff6ff;color:#1e40af}
@@ -81,6 +81,16 @@
   .booking-row:last-child{border-bottom:none}
   .booking-row.empty{padding:8px;color:var(--muted);font-size:12px;font-style:italic;text-align:center;
     display:block}
+  /* Trennlinie zwischen zwei zusammengehörigen Buchungssätzen auf einer Karte
+     -> als Pseudo-Element mit negativem left/right, damit die Linie über die
+        Spaltenlücke (gap:14px) hinweg durchgehend wirkt */
+  .booking-row.divider-top{position:relative;margin-top:10px;padding-top:14px}
+  .booking-row.divider-top::before{content:"";position:absolute;top:4px;left:-9px;right:-9px;
+    border-top:2px dashed #fb923c;pointer-events:none}
+  .sol-row-2.divider-top{position:relative;margin-top:6px;padding-top:11px}
+  .sol-row-2.divider-top::before{content:"";position:absolute;top:0;left:-9px;right:-9px;
+    border-top:2px dashed #fb923c;pointer-events:none}
+  .sol-side{overflow:visible}
   .konto-wrap{display:flex;flex-direction:column;gap:2px}
   .konto-hint{font-size:11px;line-height:1.3;min-height:14px;padding:0 4px;color:var(--muted);
     transition:color .15s}
@@ -113,7 +123,7 @@
   .sol-grid{display:grid;grid-template-columns:1fr 1fr 150px;gap:14px;margin-top:8px}
   .sol-gewinn{padding:14px;text-align:center;font-weight:700;font-size:16px}
   .sol-gewinn .gewinn-symbol{font-size:22px;display:block;margin-bottom:4px}
-  .sol-side{background:#fff;border:1px solid #fed7aa;border-radius:10px;overflow:hidden}
+  .sol-side{background:#fff;border:1px solid #fed7aa;border-radius:10px;overflow:visible}
   .sol-side h4{margin:0;padding:6px 10px;font-size:11px;letter-spacing:1px;text-transform:uppercase;
     text-align:center;font-weight:700;background:#fff7ed;color:#9a3412;border-bottom:1px solid #fed7aa}
   .sol-row-2{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px 10px;
@@ -171,8 +181,8 @@
 const BUILD = {
   // Bei JEDER Änderung Version hochzählen + aktuelle Uhrzeit aus
   // `TZ="Europe/Vienna" date "+%d.%m.%Y, %H:%M Uhr (%Z)"` einsetzen.
-  version: "v1.2",
-  timestamp: "04.05.2026, 11:27 Uhr (CEST)"
+  version: "v1.4",
+  timestamp: "10.05.2026, 12:30 Uhr (CEST)"
 };
 
 // gemeinsamer Pool von Konto-Optionen für Dropdowns
@@ -224,7 +234,12 @@ const TOPICS = [
 function bk(scenario, lines, explanation, gewinn){
   return { scenario, lines, explanation, gewinn };
 }
-function L(side, konto, betrag){ return { side, konto, betrag }; } // side = "Soll" | "Haben"
+function L(side, konto, betrag, opts){
+  // opts.divider:true zeichnet eine horizontale Trennlinie ÜBER dieser Zeile —
+  // genutzt z.B. um zwei zusammengehörige Buchungssätze (Bank + Skonto) optisch
+  // zu trennen, ohne sie auf zwei Karten zu verteilen.
+  return Object.assign({ side, konto, betrag }, opts || {});
+}
 
 /* Konstanten für die Gewinn-Auswahl */
 const GEWINN_LABELS = {
@@ -444,61 +459,47 @@ const EXERCISES = {
     fill: [],
     drop: [
       bk(
-        "<b>Eingangsrechnung E7</b> der Saisan Teppichhaus GmbH (3300): Einkauf von Orientteppichen <b>€ 7.000,00 + € 1.400,00 USt = € 8.400,00</b>. Zahlungskonditionen: 60 Tage Ziel oder 10 Tage abzgl. 3 % Skonto.",
+        "<b>Eingangsrechnung E7</b> (4.1.) der Saisan Teppichhaus GmbH (3300): Einkauf von Orientteppichen <b>€ 7.000,00 + € 1.400,00 USt = € 8.400,00</b>. Zahlungskonditionen: 60 Tage Ziel oder 10 Tage abzgl. 3 % Skonto.",
         [
           L("Soll",  "5000", 7000),
           L("Soll",  "2500", 1400),
           L("Haben", "3300", 8400)
         ],
-        "Standard-Wareneinkauf auf Ziel. Skonto wird erst bei der Bezahlung gebucht.",
+        "Standard-Wareneinkauf auf Ziel. Skonto kommt erst bei der Bezahlung — diese Karte erzeugt die Verbindlichkeit, die später (Karte 2) inkl. Skonto getilgt wird.",
         "vermindernd"
       ),
       bk(
-        "<b>Bankausgang B6</b> — wir überweisen an Saisan Teppichhaus GmbH (3300) <b>€ 8.148,00</b>: € 8.400,00 abzgl. 3 % Skonto € 252,00. Hier nur den reinen Bankausgang buchen — der Skonto kommt im nächsten Schritt.",
+        "<b>Bankausgang B6</b> (12.1.) — Bezahlung der E7 von Saisan Teppichhaus GmbH (3300) inkl. <b>3 % Skonto</b>: € 8.400,00 − € 252,00 Skonto = überwiesen € 8.148,00. <br><br>👉 <b>Beide Buchungssätze unter B6 gehören zusammen</b> (Bank-Ausgleich + Skonto-Buchung) und tilgen gemeinsam die Verbindlichkeit von € 8.400,00. <br>Skonto € 252,00 brutto = € 210,00 Netto-Skonto + € 42,00 VSt-Korrektur (252 ÷ 6 = 42).",
         [
           L("Soll",  "3300", 8148),
-          L("Haben", "2800", 8148)
+          L("Soll",  "3300",  252, {divider:true}),
+          L("Haben", "2800", 8148),
+          L("Haben", "5880",  210, {divider:true}),
+          L("Haben", "2500",   42)
         ],
-        "Erst der Zahlungsausgang gegen Bank. Wichtig: damit ist die Verbindlichkeit noch NICHT voll ausgeglichen — dafür braucht es noch die Skonto-Buchung.",
-        "neutral"
-      ),
-      bk(
-        "<b>Skonto-Buchung (Lieferant):</b> Den Brutto-Skonto € 252,00 = <b>€ 210,00 Skonto + € 42,00 Vorsteuer-Korrektur</b> auf die Saisan Teppichhaus GmbH (3300) buchen. (Berechnung VSt: 252 / 6 = 42)",
-        [
-          L("Soll",  "3300", 252),
-          L("Haben", "5880", 210),
-          L("Haben", "2500", 42)
-        ],
-        "5880 Lieferantenskonti im Haben = Aufwand wird vermindert → erfolgserhöhend. Vorsteuer im Haben korrigiert die zu viel gebuchte VSt vom Einkauf.",
+        "Buch S. 47 zeigt beide Buchungssätze unter B6: 33xx 8.148 / 2800 8.148 (Bank) UND 33xx 252 / 5880 210 + 2500 42 (Skonto). Σ Soll 33xx = 8.400 = ursprüngliche Verbindlichkeit. 5880 im Haben → Aufwandsminderung → erfolgserhöhend.",
         "erhoehend"
       ),
       bk(
-        "<b>Eingangsrechnung E421</b> Klaus Huber e.U. (3300): Mikrowellenherde <b>€ 3.120,00 inkl. 20 % USt</b> (also € 2.600,00 netto + € 520,00 USt).",
+        "<b>Eingangsrechnung E421</b> (25.7.) Klaus Huber e.U. (3300): Mikrowellenherde <b>€ 3.120,00 inkl. 20 % USt</b> (= € 2.600,00 netto + € 520,00 USt). Zahlungskonditionen mit Skontomöglichkeit.",
         [
           L("Soll",  "5000", 2600),
-          L("Soll",  "2500", 520),
+          L("Soll",  "2500",  520),
           L("Haben", "3300", 3120)
         ],
-        "Brutto € 3.120 / 1,20 = € 2.600 netto, USt = € 520. Buchung als Wareneinkauf auf Ziel.",
+        "Brutto-Rechnung — Netto rückrechnen: 3.120 / 1,20 = 2.600 netto, USt = 520. Verbindlichkeit € 3.120 wird in Karte 4 inkl. Skonto getilgt.",
         "vermindernd"
       ),
       bk(
-        "<b>Bankausgang B117</b> an Walter Schwarz OG (3300): € 2.592,00 abzüglich 3 % Skonto € 77,76 = überwiesen <b>€ 2.514,24</b>. Hier nur den Zahlungsausgang gegen Bank buchen.",
+        "<b>Bankausgang B116</b> (1.8.) — Bezahlung der E421 von Klaus Huber e.U. (3300) inkl. <b>3 % Skonto</b>: € 3.120,00 − € 93,60 Skonto = überwiesen € 3.026,40. <br><br>👉 <b>Beide Buchungssätze unter B116 gehören zusammen</b> und tilgen gemeinsam die Verbindlichkeit von € 3.120,00. <br>Skonto € 93,60 brutto = € 78,00 Netto-Skonto + € 15,60 VSt-Korrektur (93,60 ÷ 6 = 15,60).",
         [
-          L("Soll",  "3300", 2514.24),
-          L("Haben", "2800", 2514.24)
+          L("Soll",  "3300", 3026.40),
+          L("Soll",  "3300",   93.60, {divider:true}),
+          L("Haben", "2800", 3026.40),
+          L("Haben", "5880",   78, {divider:true}),
+          L("Haben", "2500",   15.60)
         ],
-        "Brutto-Skonto: 2592 × 0,03 = 77,76. Überweisungsbetrag = 2592 − 77,76 = 2.514,24.",
-        "neutral"
-      ),
-      bk(
-        "<b>Skonto-Buchung (Lieferant):</b> Brutto-Skonto € 77,76 zu Walter Schwarz OG (3300) aufteilen: <b>€ 64,80 Skonto + € 12,96 Vorsteuer-Korrektur</b>. (Berechnung: 77,76 / 6 = 12,96)",
-        [
-          L("Soll",  "3300", 77.76),
-          L("Haben", "5880", 64.80),
-          L("Haben", "2500", 12.96)
-        ],
-        "Brutto-Skonto / 1,20 = Netto-Skonto. Differenz ist die VSt-Korrektur.",
+        "Σ Soll 33xx = 3.026,40 + 93,60 = 3.120 = ursprüngliche Verbindlichkeit voll ausgeglichen. 5880 im Haben → erfolgserhöhend.",
         "erhoehend"
       )
     ]
@@ -511,61 +512,47 @@ const EXERCISES = {
     fill: [],
     drop: [
       bk(
-        "<b>Ausgangsrechnung A2437</b> an Schulz KG (2000): Verkauf von Textilien <b>€ 3.900,00 + € 780,00 USt = € 4.680,00</b>. Konditionen: 8 Tage abzgl. 2 % Skonto oder 60 Tage netto.",
+        "<b>Ausgangsrechnung A2437</b> (11.12.) an Schulz KG (2000): Verkauf von Textilien <b>€ 3.900,00 + € 780,00 USt = € 4.680,00</b>. Konditionen: 8 Tage abzgl. 2 % Skonto oder 60 Tage netto.",
         [
           L("Soll",  "2000", 4680),
           L("Haben", "4000", 3900),
-          L("Haben", "3500", 780)
+          L("Haben", "3500",  780)
         ],
-        "Standard-Warenverkauf auf Ziel. Skontomöglichkeit ändert vorerst nichts an der Buchung — der Skonto kommt erst bei Zahlung.",
+        "Standard-Warenverkauf auf Ziel. Skonto kommt erst bei Zahlung — die Forderung € 4.680 wird in Karte 2 inkl. Skonto getilgt.",
         "erhoehend"
       ),
       bk(
-        "<b>Bankeingang B214</b> — Schulz KG (2000) hat innerhalb der Kassafrist <b>€ 4.586,40</b> überwiesen (€ 4.680,00 abzgl. 2 % Skonto € 93,60).",
+        "<b>Bankeingang B214</b> (18.12.) — Schulz KG (2000) hat innerhalb der Kassafrist die A2437 inkl. <b>2 % Skonto</b> bezahlt: € 4.680,00 − € 93,60 Skonto = € 4.586,40 eingegangen. <br><br>👉 <b>Beide Buchungssätze unter B214 gehören zusammen</b> (Bank-Eingang + Skonto-Buchung) und tilgen gemeinsam die Forderung von € 4.680,00. <br>Skonto € 93,60 brutto = € 78,00 Erlösminderung + € 15,60 USt-Korrektur (93,60 ÷ 6 = 15,60).",
         [
           L("Soll",  "2800", 4586.40),
-          L("Haben", "2000", 4586.40)
+          L("Soll",  "4410",   78, {divider:true}),
+          L("Soll",  "3500",   15.60),
+          L("Haben", "2000", 4586.40),
+          L("Haben", "2000",   93.60, {divider:true})
         ],
-        "Erst der Zahlungseingang Bank gegen Kundenforderung. Mit dieser einen Buchung ist die Forderung noch NICHT voll ausgeglichen — Skonto-Buchung kommt extra.",
-        "neutral"
-      ),
-      bk(
-        "<b>Skonto-Buchung (Kunde):</b> Brutto-Skonto € 93,60 von Schulz KG (2000): <b>€ 78,00 Erlösminderung + € 15,60 USt-Korrektur</b>. (Berechnung: 93,60 / 6 = 15,60)",
-        [
-          L("Soll",  "4410", 78),
-          L("Soll",  "3500", 15.60),
-          L("Haben", "2000", 93.60)
-        ],
-        "4410 Kundenskonti 20% im Soll = Erlösminderung → vermindernd. USt im Soll storniert die zu viel gebuchte USt vom Verkauf.",
+        "Buch S. 51 zeigt beide Buchungssätze unter B214: 2800 / 20xx 4.586,40 (Bank) UND 4410 78 + 3500 15,60 / 20xx 93,60 (Skonto). Σ Haben 20xx = 4.680 = ursprüngliche Forderung voll ausgeglichen. 4410 im Soll → Erlösminderung → erfolgsmindernd.",
         "vermindernd"
       ),
       bk(
-        "<b>Ausgangsrechnung A828</b> an Norbert Miklos e.U. (2000): Warenverkauf <b>€ 2.000,00 + € 400,00 USt = € 2.400,00</b> auf Ziel.",
+        "<b>Ausgangsrechnung A828</b> (26.3.) an Norbert Miklos e.U. (2000): Warenverkauf <b>€ 2.000,00 + € 400,00 USt = € 2.400,00</b> auf Ziel. Konditionen mit Skontomöglichkeit.",
         [
           L("Soll",  "2000", 2400),
           L("Haben", "4000", 2000),
-          L("Haben", "3500", 400)
+          L("Haben", "3500",  400)
         ],
-        "Standard-Warenverkauf auf Ziel.",
+        "Standard-Warenverkauf auf Ziel. Forderung € 2.400 wird in Karte 4 inkl. Skonto getilgt.",
         "erhoehend"
       ),
       bk(
-        "<b>Bankeingang B46</b> — Norbert Miklos e.U. (2000) hat überwiesen <b>€ 2.328,00</b> (€ 2.400,00 abzüglich 3 % Skonto € 72,00).",
+        "<b>Bankeingang B46</b> (31.3.) — Norbert Miklos e.U. (2000) hat die A828 inkl. <b>3 % Skonto</b> bezahlt: € 2.400,00 − € 72,00 Skonto = € 2.328,00 eingegangen. <br><br>👉 <b>Beide Buchungssätze unter B46 gehören zusammen</b> und tilgen gemeinsam die Forderung von € 2.400,00. <br>Skonto € 72,00 brutto = € 60,00 Erlösminderung + € 12,00 USt-Korrektur (72 ÷ 6 = 12).",
         [
           L("Soll",  "2800", 2328),
-          L("Haben", "2000", 2328)
+          L("Soll",  "4410",   60, {divider:true}),
+          L("Soll",  "3500",   12),
+          L("Haben", "2000", 2328),
+          L("Haben", "2000",   72, {divider:true})
         ],
-        "Brutto-Skonto: 2400 × 0,03 = 72. Überwiesener Betrag = 2.328,00.",
-        "neutral"
-      ),
-      bk(
-        "<b>Skonto-Buchung (Kunde):</b> Brutto-Skonto € 72,00 zu Norbert Miklos e.U. (2000): <b>€ 60,00 Erlösminderung + € 12,00 USt-Korrektur</b>. (Berechnung: 72 / 6 = 12)",
-        [
-          L("Soll",  "4410", 60),
-          L("Soll",  "3500", 12),
-          L("Haben", "2000", 72)
-        ],
-        "Brutto-Skonto / 1,20 = Netto-Skonto. Differenz = USt-Korrektur.",
+        "Σ Haben 20xx = 2.328 + 72 = 2.400 = ursprüngliche Forderung voll ausgeglichen. 4410 im Soll → erfolgsmindernd.",
         "vermindernd"
       )
     ]
@@ -853,6 +840,7 @@ function render(){
 
   // Soll/Haben Spalten aufbauen mit globalen Indizes (für späteres checken)
   const buildRow = (l, i) => {
+    const cls = "booking-row" + (l.divider ? " divider-top" : "");
     const kontoCell = state.mode==="drop"
       ? buildSelect(`konto_${i}`, "")
       : `<div class="konto-wrap">
@@ -860,7 +848,7 @@ function render(){
            <div class="konto-hint" data-hint="${i}">&nbsp;</div>
          </div>`;
     const betragCell = `<input class="field betrag-input" type="text" inputmode="decimal" data-name="betrag_${i}" placeholder="0,00" autocomplete="off">`;
-    return `<div class="booking-row">${kontoCell}${betragCell}</div>`;
+    return `<div class="${cls}">${kontoCell}${betragCell}</div>`;
   };
 
   const sollRows  = lines.map((l,i)=>l.side==="Soll"  ? buildRow(l,i) : null).filter(Boolean).join("")
@@ -1037,11 +1025,13 @@ function showSolutionCard(){
   const rowFor = side => {
     const items = card.lines.filter(l=>l.side===side);
     if(!items.length) return `<div class="sol-empty">— —</div>`;
-    return items.map(l=>`
-      <div class="sol-row-2">
+    return items.map(l=>{
+      const cls = "sol-row-2" + (l.divider ? " divider-top" : "");
+      return `<div class="${cls}">
         <span class="sol-konto">${KONTEN[l.konto]||l.konto}</span>
         <span class="sol-betrag">€ ${fmt(l.betrag)}</span>
-      </div>`).join("");
+      </div>`;
+    }).join("");
   };
   const g = GEWINN_LABELS[card.gewinn] || GEWINN_LABELS.neutral;
   slot.innerHTML = `<div class="solution-card">
