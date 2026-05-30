@@ -31,13 +31,22 @@
     letter-spacing:1.2px;margin:14px 0 6px 4px;display:block}
   .section-label:first-child{margin-top:0}
   .topic-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
-  .topic-btn{flex:1 1 240px;min-width:200px;padding:12px 10px;border:2px solid var(--line);background:#fff;border-radius:12px;
+  .topic-btn{flex:1 1 240px;min-width:200px;padding:12px 10px 16px;border:2px solid var(--line);background:#fff;border-radius:12px;
     cursor:pointer;font-size:13px;font-weight:600;color:var(--text);text-align:left;transition:all .15s;
-    position:relative}
+    position:relative;overflow:hidden}
   .topic-btn:hover{border-color:var(--primary);color:var(--primary)}
   .topic-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
   .topic-btn .num{display:inline-block;width:24px;font-weight:700;color:var(--accent)}
   .topic-btn.active .num{color:#bae6fd}
+  .topic-progress{position:absolute;bottom:5px;left:10px;right:10px;height:4px;
+    background:rgba(0,0,0,0.08);border-radius:999px;overflow:hidden;
+    pointer-events:none;display:none}
+  .topic-progress.visible{display:block}
+  .topic-progress-fill{height:100%;background:var(--good);transition:width .35s cubic-bezier(.4,0,.2,1);
+    border-radius:999px;width:0%}
+  .topic-btn.active .topic-progress{background:rgba(255,255,255,0.22)}
+  .topic-btn.active .topic-progress-fill{background:#86efac}
+  .topic-btn.is-done .topic-progress{display:none !important}
   .badge{position:absolute;top:-7px;right:-7px;background:var(--bad);color:#fff;border-radius:999px;
     padding:2px 7px;font-size:11px;font-weight:700;min-width:22px;text-align:center;
     box-shadow:0 2px 4px rgba(0,0,0,.15);border:2px solid #fff}
@@ -249,8 +258,8 @@
    ============================================================ */
 
 const BUILD = {
-  version: "v4.3",
-  timestamp: "30.05.2026, 11:00 Uhr (CEST)"
+  version: "v4.4",
+  timestamp: "30.05.2026, 12:00 Uhr (CEST)"
 };
 
 /* ============================================================
@@ -1301,7 +1310,7 @@ function buildTopicBar(){
     const b = document.createElement("button");
     b.className = "topic-btn"+(t.id===state.topic?" active":"");
     b.dataset.topic = t.id;
-    b.innerHTML = `<span class="num">${idx+1}.</span><span class="topic-label">${t.label}</span>`;
+    b.innerHTML = `<span class="num">${idx+1}.</span><span class="topic-label">${t.label}</span><div class="topic-progress"><div class="topic-progress-fill"></div></div>`;
     b.onclick = ()=>{
       if(state.topic === t.id) return;
       // Position für aktuelles Topic merken (nur wenn nicht im Review oder Summary)
@@ -1347,7 +1356,26 @@ function setBadge(el, wrongCount, done){
 function updateAllBadges(){
   document.querySelectorAll(".topic-btn").forEach(b=>{
     const tid = b.dataset.topic;
-    setBadge(b, topicWrongCount(tid), topicDone(tid));
+    const wrong   = topicWrongCount(tid);
+    const correct = correctCountFor(tid, "drop");
+    const total   = (EXERCISES[tid].drop || []).length;
+    const done    = topicDone(tid);
+    setBadge(b, wrong, done);
+    // Fortschrittsbalken
+    const bar  = b.querySelector(".topic-progress");
+    const fill = b.querySelector(".topic-progress-fill");
+    if(bar && fill){
+      b.classList.toggle("is-done", done);
+      if(done || (correct === 0 && wrong === 0)){
+        bar.classList.remove("visible");
+        fill.style.width = "0%";
+      } else {
+        bar.classList.add("visible");
+        const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+        fill.style.width = pct + "%";
+        bar.title = `${correct} von ${total} richtig`;
+      }
+    }
   });
 }
 
